@@ -10,7 +10,9 @@ public class ButtonScript : MonoBehaviour
     //public int indexRecived;
     private Image buttonImage;
     //private NewVirtualMouse mouseStatus;
-    
+    [SerializeField] public LayerMask layerMask;
+
+
     public int getButtonIndex() { return buttonIndex; }
     
     void Start()
@@ -24,9 +26,10 @@ public class ButtonScript : MonoBehaviour
         
     }
 
+
     private void OnTriggerStay(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if ((layerMask.value & (1 << other.gameObject.layer)) != 0)
         {
             //mouseStatus = GameObject.FindObjectOfType<NewVirtualMouse>();
             //Debug.Log("Mouse inside me nnya!");
@@ -41,7 +44,7 @@ public class ButtonScript : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if ((layerMask.value & (1 << other.gameObject.layer)) != 0)
         {
             Debug.Log("Mouse out");
             buttonImage.color = new Color(0f, 255f, 0f); // #00FF00

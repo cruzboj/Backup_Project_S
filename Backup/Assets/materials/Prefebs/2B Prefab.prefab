@@ -93,6 +93,10 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: c651f4e2-af2c-4a4f-9463-69f37eb6c27f
     m_ActionName: player/Jump[/Keyboard/space,/DualShock4GamepadHID/buttonNorth]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 6d1ff2ef-6e60-42ca-a38c-0fe0bebb454c
+    m_ActionName: player/UI Click[/Keyboard/l,/DualShock4GamepadHID/buttonSouth]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Gamepad
   m_DefaultActionMap: player
@@ -158,6 +162,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 199e4dca92ada7a448ad5c0939062d6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  threshold: -10
 --- !u!1001 &7449809377512682987
 PrefabInstance:
   m_ObjectHideFlags: 0

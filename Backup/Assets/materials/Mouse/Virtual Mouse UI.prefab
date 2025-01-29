@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 9142706166848623413}
   - component: {fileID: 1484636814625680539}
   - component: {fileID: 5870861230237912206}
-  m_Layer: 5
+  m_Layer: 6
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -161,8 +161,8 @@ GameObject:
   - component: {fileID: 1764106960691289185}
   - component: {fileID: 1632839126108006890}
   - component: {fileID: 5845174785020015126}
-  - component: {fileID: 5055740485771011743}
-  m_Layer: 5
+  - component: {fileID: 6216376147908433823}
+  m_Layer: 6
   m_Name: Virtual Mouse UI
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -299,6 +299,11 @@ MonoBehaviour:
   clickCursor: {fileID: 21300000, guid: d87c755efdce8aa49a187ac95e86e623, type: 3}
   Child: {fileID: 8453343088025025375}
   index: 0
+  Clicked: 0
+  buttonIndex: 0
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 32
 --- !u!135 &5845174785020015126
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -320,50 +325,27 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 10
   m_Center: {x: 10, y: -10, z: 0}
---- !u!114 &5055740485771011743
+--- !u!114 &6216376147908433823
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7306879566784900772}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 621567455fd1c4ceb811cc8a00b6a1a5, type: 3}
+  m_Script: {fileID: 11500000, guid: 36b7501ef5a918149982d16e97cf5c5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_NotificationBehavior: 0
-  m_MaxPlayerCount: -1
-  m_AllowJoining: 1
-  m_JoinBehavior: 0
-  m_PlayerJoinedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_PlayerLeftEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_JoinAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: 
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: 7072c657-2ecb-4ac2-a95f-b32d2bdffc90
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
-  m_PlayerPrefab: {fileID: 0}
-  m_SplitScreen: 0
-  m_MaintainAspectRatioInSplitScreen: 0
-  m_FixedNumberOfSplitScreens: -1
-  m_SplitScreenRect:
-    serializedVersion: 2
-    x: 0
-    y: 0
-    width: 1
-    height: 1
+  availablePrefabs:
+  - {fileID: 5374206986351225616, guid: 32f766dcd82af5249a89327f35c5c5b7, type: 3}
+  - {fileID: 687689523280285557, guid: fd1b153aaadf93d4a9b83490b6face92, type: 3}
+  - {fileID: 3159980032767376935, guid: f91722cb85c8dcf4e99f837b941f92bc, type: 3}
+  - {fileID: 8669035396267978305, guid: 3555b793df8e8a1419c01d2c9c5efa44, type: 3}
+  - {fileID: 8669035396267978305, guid: 3555b793df8e8a1419c01d2c9c5efa44, type: 3}
+  - {fileID: 3045076845362275865, guid: 0333d3f3b3d4a834cadc76c7e89c740a, type: 3}
+  currentPrefabIndex: 0
+  currentPrefab: {fileID: 0}
 --- !u!1 &8453343088025025375
 GameObject:
   m_ObjectHideFlags: 0
@@ -375,7 +357,7 @@ GameObject:
   - component: {fileID: 7556972361087860506}
   - component: {fileID: 2289880947018329330}
   - component: {fileID: 6822367309988552908}
-  m_Layer: 5
+  m_Layer: 6
   m_Name: Mouse Cursor Img
   m_TagString: Untagged
   m_Icon: {fileID: 0}

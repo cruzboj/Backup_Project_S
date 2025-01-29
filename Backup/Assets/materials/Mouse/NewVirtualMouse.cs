@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.UI;
@@ -21,14 +22,18 @@ public class NewVirtualMouse : MonoBehaviour
     //ui index
     public int index = 0;
     public int getindex() { return index; }
+    private bool UiClicked = false;
 
+    public bool Clicked = false;
+    public bool getClicked() { return Clicked; }
 
-    public static bool Clicked = false;
-    public static bool getClicked() { return Clicked; }
 
     //saved button index
     public int buttonIndex;
     private ButtonScript BoxStatus;
+    public int getbuttonIndex() { return buttonIndex; }
+
+    [SerializeField] public LayerMask layerMask;
 
     private void Start()
     {
@@ -62,9 +67,20 @@ public class NewVirtualMouse : MonoBehaviour
 
     public void OnClick(InputAction.CallbackContext context)
     {
-        Clicked = context.action.triggered;
+        if (context.performed) // Trigger only when the button is pressed once
+        {
+            //Debug.LogError("Ouch you clicked me!");
+            
+            Clicked = true;
+            StartCoroutine(SpawnPrefabsWithDelay(0.025f));
+        }
+        else if (context.canceled) // Reset on release (optional)
+        {
+            Clicked = false;
+        }
 
-        if (Clicked )
+            UiClicked = context.action.triggered;
+        if (UiClicked)
             Child.GetComponent<Image>().sprite = clickCursor; // שינוי תמונת ה-Child
         else
             Child.GetComponent<Image>().sprite = defaultCursor; // שינוי תמונת ה-Child
@@ -86,7 +102,7 @@ public class NewVirtualMouse : MonoBehaviour
     {
         //Debug.Log("in side Mouse button");
 
-        if (other.CompareTag("Button Char"))
+        if ((layerMask.value & (1 << other.gameObject.layer)) != 0)
         {
             if (Clicked)
             {
@@ -133,5 +149,12 @@ public class NewVirtualMouse : MonoBehaviour
             //Debug.Log("Clicked!");
 
         }
+    }
+
+    private IEnumerator SpawnPrefabsWithDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        Clicked = false;
+
     }
 }

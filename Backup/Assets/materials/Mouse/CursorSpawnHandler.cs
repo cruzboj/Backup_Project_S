@@ -25,6 +25,7 @@ public class CursorSpawnHandler : MonoBehaviour
         // Set the new player's parent to the Player Input Manager GameObject
         playerInput.transform.SetParent(transform);
 
+        //playerInput.gameObject.name = $"Player_{playerInput.playerIndex}"; //
 
         Debug.Log($"Player {playerInput.playerIndex} joined and set as a child of Player Input Manager.");
 
