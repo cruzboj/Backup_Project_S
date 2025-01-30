@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class StartButtonScript : MonoBehaviour
 {
@@ -32,11 +33,22 @@ public class StartButtonScript : MonoBehaviour
     //new fix
     private List<NewVirtualMouse> mouseList = new List<NewVirtualMouse>();
 
+    [SerializeField] private string scene2Name = "DontDestroyOnLoad"; // שם הסצנה השנייה
+    private static GameObject persistentParent;
+
+    private List<GameObject> spawnedPrefabs = new List<GameObject>(); // רשימה חדשה לשמירת האובייקטים שנוצרו
+
+    //cluade
     void Start()
     {
+        if (persistentParent == null)
+        {
+            persistentParent = new GameObject("PersistentParent");
+            DontDestroyOnLoad(persistentParent);
+        }
+
         buttonImage = transform.GetChild(0).GetComponent<Image>();
         spawnPrefab = GetComponent<PlayerPrefabSelector>();
-
     }
 
     void Update()
@@ -143,36 +155,93 @@ public class StartButtonScript : MonoBehaviour
         }
         //mouseStatus = null;
     }
-    
+
+    //private IEnumerator SpawnPrefabsWithDelay(float delay)
+    //{
+    //    yield return new WaitForSeconds(delay);
+    //    //HashSet<int> spawnedIndices = new HashSet<int>(); // למנוע כפילויות
+    //    //for (int i = 0; i < buttonIndex.Length; i++)
+    //    //{
+    //    //    if (buttonIndex[i] > 0 && !spawnedIndices.Contains(buttonIndex[i]))
+    //    //    {
+    //    //        int prefabIndex = buttonIndex[i] - 1;
+
+    //    //        if (prefabIndex > 0 && prefabIndex < availablePrefabs.Count)
+    //    //        {
+    //    //            GameObject Prefab = availablePrefabs[buttonIndex[i]];
+    //    //            Instantiate(Prefab, Vector3.zero, Quaternion.identity);
+
+    //    //            spawnedIndices.Add(buttonIndex[i]); // מונע כפילויות
+    //    //        }
+    //    //    }
+    //    //}
+
+    //    for (int i = 0; i < 10; i++) //buttonIndex[i] != null
+    //    {
+    //        if (buttonIndex[i] != -1)
+    //        {
+    //            Prefab = availablePrefabs[buttonIndex[i]];
+    //            yield return new WaitForSeconds(delay); // מחכה לפני הספאון
+
+    //            //new
+    //            //GameObject spawnedPrefab = Instantiate(Prefab, Vector3.zero, Quaternion.identity);
+    //            //DontDestroyOnLoad(spawnedPrefab);
+
+    //            GameObject spawnedPrefab = Instantiate(availablePrefabs[buttonIndex[i]], Vector3.zero, Quaternion.identity);
+
+    //            // העבר את ה-Prefab ל-DontDestroyOnLoad
+    //            DontDestroyOnLoad(spawnedPrefab);
+    //        }
+    //    }
+    //    //new
+    //    yield return new WaitForSeconds(10f);
+    //    SceneManager.LoadScene(scene2Name);
+    //}
     private IEnumerator SpawnPrefabsWithDelay(float delay)
     {
+        spawnedPrefabs.Clear();
         yield return new WaitForSeconds(delay);
-        //HashSet<int> spawnedIndices = new HashSet<int>(); // למנוע כפילויות
-        //for (int i = 0; i < buttonIndex.Length; i++)
-        //{
-        //    if (buttonIndex[i] > 0 && !spawnedIndices.Contains(buttonIndex[i]))
-        //    {
-        //        int prefabIndex = buttonIndex[i] - 1;
 
-        //        if (prefabIndex > 0 && prefabIndex < availablePrefabs.Count)
-        //        {
-        //            GameObject Prefab = availablePrefabs[buttonIndex[i]];
-        //            Instantiate(Prefab, Vector3.zero, Quaternion.identity);
+        // וודא שיש לנו הורה קבוע
+        if (persistentParent == null)
+        {
+            persistentParent = new GameObject("PersistentParent");
+            DontDestroyOnLoad(persistentParent);
+        }
 
-        //            spawnedIndices.Add(buttonIndex[i]); // מונע כפילויות
-        //        }
-        //    }
-        //}
-
-        for (int i = 0; i < 10; i++) //buttonIndex[i] != null
+        for (int i = 0; i < 10; i++)
         {
             if (buttonIndex[i] != -1)
             {
                 Prefab = availablePrefabs[buttonIndex[i]];
-                yield return new WaitForSeconds(delay); // מחכה לפני הספאון
+                yield return new WaitForSeconds(delay);
 
-                Instantiate(Prefab, Vector3.zero, Quaternion.identity);
+                // יצירת הקלון והגדרתו כבן של ה-persistentParent
+                GameObject spawnedPrefab = Instantiate(Prefab, Vector3.zero, Quaternion.identity);
+                spawnedPrefab.transform.SetParent(persistentParent.transform);
+                spawnedPrefabs.Add(spawnedPrefab);
             }
         }
+
+        yield return new WaitForSeconds(10f);
+        SceneManager.LoadScene(scene2Name);
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        foreach (GameObject obj in spawnedPrefabs)
+        {
+            if (obj != null)
+            {
+                // שחרור מההורה והעברה לסצנה החדשה
+                obj.transform.SetParent(null);
+                SceneManager.MoveGameObjectToScene(obj, scene);
+            }
+        }
+
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    
 }

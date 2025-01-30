@@ -1,44 +1,102 @@
-//using UnityEngine;
-//using UnityEngine.InputSystem;
-//using System.Collections.Generic;
-//using UnityEngine.InputSystem.Utilities;
+﻿using UnityEngine;
+using UnityEngine.InputSystem;
+using System.Collections.Generic;
+using UnityEngine.InputSystem.Utilities;
 
-//public class GameManager : MonoBehaviour
-//{
-//    private PlayerInputManager playerInputManager;
+public class GameManager : MonoBehaviour
+{
+    [SerializeField] public LayerMask layerMask;
+    private PlayerInputManager playerInputManager;
+    private HashSet<GameObject> processedObjects = new HashSet<GameObject>(); // לעקוב אחר אובייקטים שכבר טופלו
 
-//    private void Start()
-//    {
-//        playerInputManager = FindObjectOfType<PlayerInputManager>();
+    void Start()
+    {
+        playerInputManager = FindObjectOfType<PlayerInputManager>();
+        if (playerInputManager == null)
+        {
+            GameObject inputManagerObject = new GameObject("PlayerInputManager");
+            playerInputManager = inputManagerObject.AddComponent<PlayerInputManager>();
+        }
 
-//        if (playerInputManager != null)
-//        {
-//            // Retrieve the saved devices from DeviceManager
-//            List<InputDevice> devices = DeviceManager.Instance.GetDevices();
+        // מכבה את כל ה-PlayerInput components בהתחלה
+        DisableAllPlayerInputs();
+        AssignPlayersToInputManager();
+    }
 
-//            // Loop through all PlayerInput components managed by PlayerInputManager
-//            var playerInputs = playerInputManager.GetComponentsInChildren<PlayerInput>();
+    void Update()
+    {
+        AssignPlayersToInputManager();
+    }
 
-//            foreach (var playerInput in playerInputs)
-//            {
-//                playerInput.SwitchCurrentActionMap("Gameplay"); // Switch to the correct action map
+    private void DisableAllPlayerInputs()
+    {
+        PlayerInput[] allPlayerInputs = FindObjectsOfType<PlayerInput>();
+        foreach (PlayerInput playerInput in allPlayerInputs)
+        {
+            playerInput.enabled = false;
+        }
+    }
 
-//                // Clone the existing devices (if any) into a list
-//                List<InputDevice> allDevices = new List<InputDevice>(playerInput.devices);
+    private void AssignPlayersToInputManager()
+    {
+        if (playerInputManager == null) return;
 
-//                // Add the previously saved devices from DeviceManager to the list
-//                allDevices.AddRange(devices);
+        GameObject[] allObjects = GameObject.FindObjectsOfType<GameObject>();
 
-//                // Clear the current devices
-//                //playerInput.devices.Clear();
+        foreach (GameObject obj in allObjects)
+        {
+            // בודק אם האובייקט נמצא בשכבה המתאימה וטרם טופל
+            if ((layerMask.value & (1 << obj.layer)) != 0 && !processedObjects.Contains(obj))
+            {
+                HandlePlayerObject(obj);
+            }
+        }
+    }
 
-//                // Assign the new list of devices to PlayerInput
-//                playerInput.devices = new ReadOnlyArray<InputDevice>(allDevices.ToArray());
-//            }
-//        }
-//        else
-//        {
-//            Debug.LogError("PlayerInputManager not found in the scene.");
-//        }
-//    }
-//}
+    private void HandlePlayerObject(GameObject obj)
+    {
+        // שומר מיקום מקורי
+        Vector3 originalPosition = obj.transform.position;
+        Quaternion originalRotation = obj.transform.rotation;
+        Vector3 originalScale = obj.transform.localScale;
+
+        // מעביר להיות ילד של ה-PlayerInputManager
+        obj.transform.SetParent(playerInputManager.transform);
+
+        // משחזר מיקום
+        obj.transform.position = originalPosition;
+        obj.transform.rotation = originalRotation;
+        obj.transform.localScale = originalScale;
+
+        // מטפל ב-PlayerInput component
+        PlayerInput playerInput = obj.GetComponent<PlayerInput>();
+        if (playerInput == null)
+        {
+            playerInput = obj.AddComponent<PlayerInput>();
+        }
+
+        // מפעיל את ה-PlayerInput פעם אחת
+        if (!processedObjects.Contains(obj))
+        {
+            playerInput.enabled = true;
+            processedObjects.Add(obj);
+            Debug.Log($"Activated PlayerInput for {obj.name}");
+        }
+    }
+
+    public void AddPlayerToInputManager(GameObject player)
+    {
+        if (playerInputManager != null && (layerMask.value & (1 << player.layer)) != 0)
+        {
+            HandlePlayerObject(player);
+        }
+    }
+
+    // פונקציה לריסט של האקטיבציה (אם תצטרך)
+    public void ResetPlayerActivation()
+    {
+        processedObjects.Clear();
+        DisableAllPlayerInputs();
+        AssignPlayersToInputManager();
+    }
+}

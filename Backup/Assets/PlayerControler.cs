@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
 //local multi p1 vs p2 exc... :: https://www.youtube.com/watch?v=g_s0y5yFxYg
@@ -47,6 +47,29 @@ public class PlayerControler : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawCube(transform.position - transform.up * rayBeam, boxSize);
     }
+
+
+    //[SerializeField] public LayerMask LayerMask_player;
+    //void Awake()
+    //{
+    //    GameObject[] objs = FindObjectsOfType<GameObject>(); // Get all GameObjects in the scene
+
+    //    int count = 0;
+    //    foreach (GameObject obj in objs)
+    //    {
+    //        if ((LayerMask_player.value & (1 << obj.gameObject.layer)) != 0) // Replace with your actual layer name
+    //        {
+    //            count++;
+    //            if (count > 1) // If there is already one, destroy the extra
+    //            {
+    //                Destroy(gameObject);
+    //                return;
+    //            }
+    //        }
+    //    }
+
+    //    DontDestroyOnLoad(gameObject);
+    //}
 
     private void Start()
     {

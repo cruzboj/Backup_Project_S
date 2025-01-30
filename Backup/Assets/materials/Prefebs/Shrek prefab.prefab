@@ -774,7 +774,7 @@ GameObject:
   - component: {fileID: 197314264379703861}
   - component: {fileID: 1497594207803406882}
   - component: {fileID: 7768918757540117520}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Shrek prefab
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -854,6 +854,10 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: c651f4e2-af2c-4a4f-9463-69f37eb6c27f
     m_ActionName: player/Jump[/Keyboard/space,/DualShock4GamepadHID/buttonNorth]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 6d1ff2ef-6e60-42ca-a38c-0fe0bebb454c
+    m_ActionName: player/UI Click[/Keyboard/l,/DualShock4GamepadHID/buttonSouth]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Gamepad
   m_DefaultActionMap: player

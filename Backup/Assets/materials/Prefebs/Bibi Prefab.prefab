@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2231916605621917494}
   - component: {fileID: 1004822881959519473}
   - component: {fileID: 661590211531427006}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Bibi Prefab
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -93,6 +93,10 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: c651f4e2-af2c-4a4f-9463-69f37eb6c27f
     m_ActionName: player/Jump[/Keyboard/space,/DualShock4GamepadHID/buttonNorth]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 6d1ff2ef-6e60-42ca-a38c-0fe0bebb454c
+    m_ActionName: player/UI Click[/Keyboard/l,/DualShock4GamepadHID/buttonSouth]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Gamepad
   m_DefaultActionMap: player
@@ -214,6 +218,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 6943cf3f4090c4c429b372fcf9ddb7e4, type: 3}
       propertyPath: m_Name
       value: bibi_netanyahu_3d_t_p_0123124620_texture
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 6943cf3f4090c4c429b372fcf9ddb7e4, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

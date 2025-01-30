@@ -166,7 +166,7 @@ GameObject:
   - component: {fileID: 932024138}
   - component: {fileID: 932024137}
   - component: {fileID: 932024136}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: map_ground
   m_TagString: Ground
   m_Icon: {fileID: 0}
@@ -460,7 +460,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5697323741064741086, guid: 403978c7f4684b142963594897c0b1d2, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6569538090332792538, guid: 403978c7f4684b142963594897c0b1d2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -679,6 +679,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17652c580cf6f1a4ba910525a77d1b8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
