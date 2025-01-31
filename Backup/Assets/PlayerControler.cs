@@ -1,44 +1,73 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
+using static UnityEngine.Rendering.VirtualTexturing.Debugging;
 
 //local multi p1 vs p2 exc... :: https://www.youtube.com/watch?v=g_s0y5yFxYg
 [RequireComponent(typeof(CharacterController))]
 public class PlayerControler : MonoBehaviour
 {
-    [SerializeField]
-    private float playerSpeed = 15.0f;
-    [SerializeField]
-    private float jumpHeight = 1.0f;
-    [SerializeField]
-    private float gravityValue = -9.81f;
+    [Header("Player Parameters")]
+    public int PlayerIndex;
+    [SerializeField] private float playerWeight = 1 ;
+
+    private PlayerInput playerInput;
+    public int getPlayerIndex() { return PlayerIndex; }
+
+    private CharacterController controller;
 
     //handel rotation ints
     private float currentYRotation = 0f; // Track the current rotation
-    private float _rotationFactorPerFrame = 25.0f;
+    private float _rotationFactorPerFrame = 25.8f;
 
-    //gravity
-    //new - castRay
+
+    [Header("Gravity Parameters")]
+    [SerializeField]private float gravityValue = -9.81f;
+    //character controller down force
+    private Vector3 playerVelocity;
+    public bool groundedPlayer;
+    
+
+    
+
+    [Header("RAY CAST")]
     [SerializeField] public LayerMask layerMask; //set to Ground
     RaycastHit hit;
     private float rayBeam = 0.1f;
     public Vector3 boxSize = new Vector3(1f, 0.3f, 1f); //1 ,0.3 ,1
     public bool _grounded = true;
-    private float _downForce = 9.8f;
+    //private float _downForce = 9.8f;
 
 
-    //jump
+    [Header("Jump parameters")]
+    [SerializeField]private float jumpHeight = 0.5f;
     public bool jumped = false; //unity input context  (jumped)
     public int _jumpCount = 0; // jump counter
-    private int _maxJumpCount = 1; // max Jumps allowed
-    private float _jumpForce = 12f;
+    public int _maxJumpCount = 1; // max Jumps allowed
+    private float maxJumptime = 0.5f;
+    private float intitialjumpVelocity;
     //doublejump effect
     //public ParticleSystem DoublejumpSmoke;
     
-    private CharacterController controller;
-    private Vector3 playerVelocity;
-    private bool groundedPlayer;
-    
-    private Vector2 movementInput = Vector2.zero; //unity input context  (movementInput)
+    [Header("Movement Parameters")]
+    [SerializeField]private float playerSpeed = 15.0f;
+    [SerializeField] private float DownInput = 0.09f;
+    public bool _isMovementPressed;
+    public bool _isWalking;
+    public bool _isRunning;
+    //movement calculation
+    Vector2 _currentMovementInput;
+    Vector2 _currentMovement;
+    public float _walkSpeed = 3f;
+    public float _runSpeed = 6f;
+    private float _currentSpeed;
+    private float _threshold = 0.9f;
+
+    [Header("Normal Attack Parameters")]
+    public bool _isAttackPressed;
+    public float TimeAttack1 = 10f;
 
     //newfunc - CastRay
     private void OnDrawGizmos()
@@ -49,95 +78,295 @@ public class PlayerControler : MonoBehaviour
     }
 
 
-    //[SerializeField] public LayerMask LayerMask_player;
-    //void Awake()
-    //{
-    //    GameObject[] objs = FindObjectsOfType<GameObject>(); // Get all GameObjects in the scene
+    //animations
+    public Animator _animator;
+    const string _PLAYER_RUN = "Player_run";
+    const string _PLAYER_IDLE = "Player_idle";
+    const string _PLAYER_WALK = "Player_walk";
+    const string _PLAYER_JUMP = "Player_jump";
+    const string _PLAYER_ATTACK = "Attack 1";
 
-    //    int count = 0;
-    //    foreach (GameObject obj in objs)
-    //    {
-    //        if ((LayerMask_player.value & (1 << obj.gameObject.layer)) != 0) // Replace with your actual layer name
-    //        {
-    //            count++;
-    //            if (count > 1) // If there is already one, destroy the extra
-    //            {
-    //                Destroy(gameObject);
-    //                return;
-    //            }
-    //        }
-    //    }
+    [Header("KnockBack")]
+    public float KBForce = 1f;
+    public float _kbCounter = 0.01f;
+    [SerializeField] public LayerMask KB_PlayerMask;
+    private float _kbTotalTime = 0.05f;
+    private bool _knockFromRight;
 
-    //    DontDestroyOnLoad(gameObject);
-    //}
+    public float fixedForce = 2.0f;
+    public float PlayerDamage;
+    public float KBCounter { get { return _kbCounter; } set { _kbCounter = value; } }
+    public float KBTotalTime { get { return _kbTotalTime; } set { _kbTotalTime = value; } }
+    public bool KnockFromRight { get { return _knockFromRight; } set { _knockFromRight = value; } }
+
+    //attaking collider
+    [SerializeField] private Collider[] childCollider; // Reference to the capsule collider
+    public void takehealth(float Force)
+    {
+        //        [ [ [  [ (p / 10) + (p * pd)/20 ] *             [200 / w+100 ] ] * 1.4] +18]
+        KBForce = ( ( ( ( (Force / 10) + ( (Force * 10) / 20) ) * ( 200 /( playerWeight + 100) ) )* 1.4f) +18) /30;
+
+        fixedForce = Force;
+        /* [ [ [ [ (p/10 + pd/20) * (200/ (w+100) ) * 1.4 ] + 18 ] * s ] + b ] * r ] formula
+        p = currenthealth (force)
+        d = other_player_damage
+        w = character weight
+        s = Knockback scaling (knock back increase rate) 
+        b = base knock back;
+        r = 1 or 0 Error turms (rage,crouch camcelling , character size , frozem effect ...)
+        */
+    }
+
+    private void Awake()
+    {
+
+        //get player index
+        playerInput = GetComponent<PlayerInput>(); // מקבל את ה- PlayerInput
+        if (playerInput != null)
+        {
+            PlayerIndex = playerInput.playerIndex + 1;
+            Debug.Log("Player Index: " + PlayerIndex);
+        }
+        else
+        {
+            Debug.LogError("PlayerInput component not found!");
+        }
+
+        setupJumpVariables();
+    }
+
+    void setupJumpVariables()
+    {
+        float timeToApex = maxJumptime / 2;
+        gravityValue = (-2*jumpHeight) / Mathf.Pow(timeToApex,2);
+        intitialjumpVelocity = (2 * jumpHeight) / timeToApex;
+    }
 
     private void Start()
     {
         controller = gameObject.GetComponent<CharacterController>();
+        _animator = GetComponent<Animator>();
+    }
+
+    void Update()
+    {
+        //Movement check
+        if (_isMovementPressed)
+        {
+            handleRotation();
+        }
+
+        if (KBCounter < 0)
+        {
+            handleMovement();
+        }
+        else
+        {
+            Vector3 move;
+            if (_knockFromRight)
+            {
+                move = new Vector3(-KBForce, KBForce, 0); 
+            }
+            else
+            {
+                move = new Vector3(KBForce, KBForce, 0); 
+            }
+            controller.Move(move * Time.deltaTime * playerSpeed);
+            _kbCounter -= Time.deltaTime;
+        }
+
+        //if (_kbCounter > 0)
+        //{
+        //    // הגדר תנועת knockback ברורה
+        //    if (_knockFromRight)
+        //    {
+        //        _currentMovement.x = -KBForce;  // זרוק שמאלה
+        //        _currentMovement.y = KBForce;   // זרוק למעלה
+        //    }
+        //    else
+        //    {
+        //        _currentMovement.x = KBForce;   // זרוק ימינה
+        //        _currentMovement.y = KBForce;    // זרוק למעלה
+        //    }
+
+        //    handleMovement();
+        //    _kbCounter -= Time.deltaTime;
+        //}
+        //else
+        //{
+        //    // החזר לתנועה רגילה
+        //    _currentMovement.x = 0;
+        //    handleMovement();
+        //}
+
+        //Attack Check
+        if (_isAttackPressed && _grounded)
+        {
+            handleAttack();
+
+        }
+        else if (_isAttackPressed && !_grounded)
+        {
+            //handleAirAttack();
+        }
+        else
+        {
+
+        }
+
+        GroundCheck();
+        handleGravity();
+
+        // Jump Check
+        if (jumped && _grounded || jumped && (_jumpCount < _maxJumpCount))
+        {
+            HandleJump();
+        }
     }
 
     public void OnMove(InputAction.CallbackContext context)
     {
-        movementInput = context.ReadValue<Vector2>();
+        _currentMovementInput = context.ReadValue<Vector2>();
+        _isMovementPressed = _currentMovementInput.magnitude > 0;
+        if (!_isMovementPressed)
+        {
+            _isRunning = false;
+            _isWalking = false;
+            _animator.Play(_PLAYER_IDLE);
+        }
+        else if (_currentMovementInput.magnitude >= _threshold)
+        {
+            _isRunning = true;
+            _isWalking = false;
+            _animator.Play(_PLAYER_RUN);
+        }
+        else if (_currentMovementInput.magnitude < _threshold)
+        {
+            _isWalking = true;
+            _isRunning = false;
+            _animator.Play(_PLAYER_WALK);
+        }
+        
 
+        //old movement
+        //movementInput = context.ReadValue<Vector2>();
     }
+
     public void OnJump(InputAction.CallbackContext context)
     {
-        //jumped = context.ReadValue<bool>();
-        //jumped = context.action.triggered;
+        if (context.performed) // Trigger only when the button is pressed once
+        {
+            //Debug.LogError("Ouch you clicked me!");
+
+            jumped = true;
+            _grounded = false;
+            StartCoroutine(SpawnPrefabsWithDelay(0.025f));
+        }
+        else if (context.canceled) // Reset on release (optional)
+        {
+            jumped = false;
+        }
+    }
+
+    public void OnAttack(InputAction.CallbackContext context)
+    {
         if (context.performed)
         {
-            jumped = true; // Set flag when jump is triggered
+            _isAttackPressed = true;
+        }
+        else if (context.canceled) 
+        {
+            _isAttackPressed = false;
+            StartCoroutine(SpawnDelay(TimeAttack1));
+            for (int i = 0; i < childCollider.Length; i++)
+            {
+                childCollider[i].enabled = false; // להדליק את הקוליידר בזמן התקפה
+            }
         }
     }
-    void Update()
+
+    private IEnumerator SpawnPrefabsWithDelay(float delay)
     {
-        //GroundCheck();
-        groundedPlayer = controller.isGrounded;
-        if (groundedPlayer && playerVelocity.y < 0)
-        {
-            playerVelocity.y = 0f;
-        }
+        yield return new WaitForSeconds(delay);
+        jumped = false;
 
-        Vector3 move = new Vector3(movementInput.x, 0, 0);
-        controller.Move(move * Time.deltaTime * playerSpeed);
-
-        if (move != Vector3.zero)
-        {
-            //gameObject.transform.forward = move;
-            handleRotation();
-        }
-
-        // Makes the player jump
-        if (jumped && groundedPlayer)
-        {
-            //playerVelocity.y += Mathf.Sqrt(jumpHeight * -3.0f * gravityValue);
-            //jumped = false;
-            HandleJump();
-        }
-            playerVelocity.y += gravityValue * Time.deltaTime;
-            controller.Move(playerVelocity * Time.deltaTime);
     }
+
+    
     void HandleJump()
     {
-        if (_grounded && jumped || jumped && (_jumpCount < _maxJumpCount))
+        if(jumped && controller.isGrounded || jumped && (_jumpCount < _maxJumpCount))
         {
-            playerVelocity.y += Mathf.Sqrt(jumpHeight * -3.0f * gravityValue);
+            _currentMovement.y = intitialjumpVelocity / playerWeight;
             _jumpCount++;
-            //Debug.Log("Jumped! Jump Count: " + _jumpCount);
             jumped = false;
-            //_animator.SetBool(_isJumpingHash, true);
-            //changeAnimeationState(_PLAYER_JUMP2);
         }
+        //if (_grounded && jumped || jumped && (_jumpCount < _maxJumpCount))
+        //{
+        //    playerVelocity.y += Mathf.Sqrt(jumpHeight * -3.0f * gravityValue);
+        //    _jumpCount++;
+        //    //Debug.Log("Jumped! Jump Count: " + _jumpCount);
+        //    jumped = false;
+        //    //_animator.SetBool(_isJumpingHash, true);
+        //    _animator.Play(_PLAYER_JUMP);
+
+        //}
+    }
+
+    void handleMovement()
+    {
+        Vector3 move;
+        if (_kbCounter < 0)
+        {
+            move = new Vector3(_currentMovementInput.x, _currentMovement.y, 0);
+            
+        }
+        else
+        {
+            move = new Vector3((_currentMovement.x * _currentMovement.x) / playerWeight, (_currentMovement.y * _currentMovement.y) / playerWeight, 0); //look at desmos [-(0.5* 20)/x]
+            Debug.Log($"Knockback Move: X={move.x}, Y={move.y}, Force={KBForce}");
+        }
+
+        controller.Move(move * Time.deltaTime * playerSpeed);
+
+        if (!_grounded && _currentMovementInput.y < 0)
+        {
+            _currentMovement.y -= DownInput;
+        }
+        //Vector3 move;
+        //if (_kbCounter > 0)
+        //{
+        //    // וודא שיש תנועה גם ב-X
+        //    move = new Vector3((_currentMovement.x * _currentMovement.x)/playerWeight, (_currentMovement.y * _currentMovement.y) / playerWeight, 0); //look at desmos [-(0.5* 20)/x]
+        //    Debug.Log($"Knockback Move: X={move.x}, Y={move.y}, Force={KBForce}");
+        //}
+        //else
+        //{
+        //    move = new Vector3(_currentMovementInput.x, _currentMovement.y, 0);
+        //}
+
+        //controller.Move(move * Time.deltaTime * playerSpeed);
+
+        //if (!_grounded && _currentMovementInput.y < 0)
+        //{
+        //    _currentMovement.y -= DownInput;
+        //}
+
+        //Vector3 move = new Vector3(_currentMovementInput.x, _currentMovement.y / jumpHeight, 0);
+        //controller.Move(move * Time.deltaTime * playerSpeed);
+        //if (!_grounded && _currentMovementInput.y < 0)
+        //{
+        //    _currentMovement.y -= DownInput;
+        //}
     }
     void handleRotation()
     {
         // Check if there is movement input to determine rotation direction
-        if (movementInput.x > 0) // Moving right
+        if (_currentMovementInput.x > 0) // Moving right
         {
             currentYRotation = 90f; // Snap to 90 degrees
         }
-        else if (movementInput.x < 0) // Moving left
+        else if (_currentMovementInput.x < 0) // Moving left
         {
             currentYRotation = -90f; // Snap to -90 degrees
         }
@@ -148,6 +377,18 @@ public class PlayerControler : MonoBehaviour
         // Smoothly interpolate to the target rotation
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * _rotationFactorPerFrame);
     }
+    void handleGravity()
+    {
+        if (controller.isGrounded)
+        {
+            float groundedGravity = -.05f;
+            _currentMovement.y = groundedGravity;
+        }
+        else
+        {
+            _currentMovement.y += gravityValue * Time.deltaTime;
+        }
+    }
 
     private bool GroundCheck()
     {
@@ -157,13 +398,59 @@ public class PlayerControler : MonoBehaviour
             //Debug.Log("Grounded");
             _jumpCount = 0;
             _grounded = true;
+            groundedPlayer = _grounded;
             return true;
         }
         else
         {
             //Debug.Log("NOT grounded");
             _grounded = false;
+            groundedPlayer = _grounded;
             return false;
         }
+    }
+
+    private void handleAttack()
+    {
+        _animator.Play(_PLAYER_ATTACK);
+
+        for (int i = 0; i < childCollider.Length; i++)
+        {
+            childCollider[i].enabled = true; // להדליק את הקוליידר בזמן התקפה
+        }
+
+        StartCoroutine(SpawnDelay(TimeAttack1));
+    }
+
+
+
+    //handle knockback
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.transform.IsChildOf(transform))
+        {
+            Debug.Log("self hit");
+            return;
+        }
+        else if (KB_PlayerMask == (KB_PlayerMask | (1 << other.transform.gameObject.layer)))
+        {
+            //Apply knockback
+            //controller = gameObject.GetComponent<CharacterController>();
+            
+            DamageControl damageControl = other.GetComponent<DamageControl>();
+
+            if (damageControl != null) // אם יש לו את הסקריפט
+            {
+                float force = damageControl.getDamage();
+                Debug.Log("Knockback Value: " + force);
+                takehealth(force);
+            }
+        }
+    }
+
+    private IEnumerator SpawnDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
     }
 }

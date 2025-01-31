@@ -12,7 +12,6 @@ public class StartButtonScript : MonoBehaviour
     private Image buttonImage;
     public int indexRecived = -1;
 
-    //new idea 
     [SerializeField] private List<GameObject> availablePrefabs = new List<GameObject>();
     [SerializeField] private int currentPrefabIndex = 0;
     private NewVirtualMouse PlayerChooseIndex;
@@ -38,7 +37,6 @@ public class StartButtonScript : MonoBehaviour
 
     private List<GameObject> spawnedPrefabs = new List<GameObject>(); // רשימה חדשה לשמירת האובייקטים שנוצרו
 
-    //cluade
     void Start()
     {
         if (persistentParent == null)
