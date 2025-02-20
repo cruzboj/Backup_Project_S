@@ -11,10 +11,10 @@ public class PlayerControler : MonoBehaviour
 {
     [Header("Player Parameters")]
     public int PlayerIndex;
-    [SerializeField] private float playerWeight = 1 ;
+    public int getPlayerIndex() {  return PlayerIndex; }
+    [SerializeField] private float playerWeight = 1.4f ;
 
     private PlayerInput playerInput;
-    public int getPlayerIndex() { return PlayerIndex; }
 
     private CharacterController controller;
 
@@ -30,8 +30,6 @@ public class PlayerControler : MonoBehaviour
     public bool groundedPlayer;
     
 
-    
-
     [Header("RAY CAST")]
     [SerializeField] public LayerMask layerMask; //set to Ground
     RaycastHit hit;
@@ -39,6 +37,19 @@ public class PlayerControler : MonoBehaviour
     public Vector3 boxSize = new Vector3(1f, 0.3f, 1f); //1 ,0.3 ,1
     public bool _grounded = true;
     //private float _downForce = 9.8f;
+
+    private void OnDrawGizmos()
+    {
+        //hitbox for grounded.
+        Gizmos.color = Color.green;
+        Gizmos.DrawCube(transform.position - transform.up * rayBeam, boxSize);
+
+        //attack1_hitbox
+        Gizmos.color = new Color(1f, 0f, 0f, 0.5f);
+        Vector3 positionInFront = transform.position + transform.forward * location_ray_position_1; // "2f" הוא המרחק מהדמות
+        positionInFront.y += location_ray_height_1; // הזז את הגיזמו למעלה ב-0.5 יחידות
+        Gizmos.DrawCube(positionInFront, boxSize_hitbox_1);
+    }
 
 
     [Header("Jump parameters")]
@@ -68,15 +79,7 @@ public class PlayerControler : MonoBehaviour
     [Header("Normal Attack Parameters")]
     public bool _isAttackPressed;
     public float TimeAttack1 = 10f;
-
-    //newfunc - CastRay
-    private void OnDrawGizmos()
-    {
-        //hitbox for grounded.
-        Gizmos.color = Color.red;
-        Gizmos.DrawCube(transform.position - transform.up * rayBeam, boxSize);
-    }
-
+    
 
     //animations
     public Animator _animator;
@@ -89,7 +92,7 @@ public class PlayerControler : MonoBehaviour
     [Header("KnockBack")]
     public float KBForce = 1f;
     public float _kbCounter = 0.01f;
-    [SerializeField] public LayerMask KB_PlayerMask;
+    
     private float _kbTotalTime = 0.05f;
     private bool _knockFromRight;
 
@@ -98,6 +101,19 @@ public class PlayerControler : MonoBehaviour
     public float KBCounter { get { return _kbCounter; } set { _kbCounter = value; } }
     public float KBTotalTime { get { return _kbTotalTime; } set { _kbTotalTime = value; } }
     public bool KnockFromRight { get { return _knockFromRight; } set { _knockFromRight = value; } }
+
+    [Header("RAY CAST Knockback")]
+    [SerializeField] public LayerMask KB_PlayerMask;
+    RaycastHit hit_hitbox;
+    private float rayBeam_knockback = 0.1f;
+
+    [Header("RAY CAST Attack1")]
+    public Vector3 boxSize_hitbox_1 = new Vector3(1f, 0.3f, 1f); //1 ,0.3 ,1
+    public float location_ray_height_1;
+    public float location_ray_position_1;
+    public bool hitbox1 = false;
+    public float damage1 = 10f;
+    public float getDamage1() { return damage1; }
 
     //attaking collider
     [SerializeField] private Collider[] childCollider; // Reference to the capsule collider
@@ -202,8 +218,8 @@ public class PlayerControler : MonoBehaviour
         //Attack Check
         if (_isAttackPressed && _grounded)
         {
-            handleAttack();
-
+            //handleAttack();
+            Attack1();
         }
         else if (_isAttackPressed && !_grounded)
         {
@@ -278,10 +294,10 @@ public class PlayerControler : MonoBehaviour
         {
             _isAttackPressed = false;
             StartCoroutine(SpawnDelay(TimeAttack1));
-            for (int i = 0; i < childCollider.Length; i++)
-            {
-                childCollider[i].enabled = false; // להדליק את הקוליידר בזמן התקפה
-            }
+            //for (int i = 0; i < childCollider.Length; i++)
+            //{
+            //    childCollider[i].enabled = false; // להדליק את הקוליידר בזמן התקפה
+            //}
         }
     }
 
@@ -303,10 +319,10 @@ public class PlayerControler : MonoBehaviour
         }
         //if (_grounded && jumped || jumped && (_jumpCount < _maxJumpCount))
         //{
-        //    playerVelocity.y += Mathf.Sqrt(jumpHeight * -3.0f * gravityValue);
-        //    _jumpCount++;
+            playerVelocity.y += Mathf.Sqrt(jumpHeight * -3.0f * gravityValue);
+            _jumpCount++;
         //    //Debug.Log("Jumped! Jump Count: " + _jumpCount);
-        //    jumped = false;
+            jumped = false;
         //    //_animator.SetBool(_isJumpingHash, true);
         //    _animator.Play(_PLAYER_JUMP);
 
@@ -393,7 +409,7 @@ public class PlayerControler : MonoBehaviour
     private bool GroundCheck()
     {
         // Check if the box collides with the ground and set the grounded status
-        if (Physics.CheckBox(transform.position, boxSize, transform.rotation, layerMask))
+        if (Physics.CheckBox(transform.position, boxSize_hitbox_1, transform.rotation, layerMask))
         {
             //Debug.Log("Grounded");
             _jumpCount = 0;
@@ -413,7 +429,6 @@ public class PlayerControler : MonoBehaviour
     private void handleAttack()
     {
         _animator.Play(_PLAYER_ATTACK);
-
         for (int i = 0; i < childCollider.Length; i++)
         {
             childCollider[i].enabled = true; // להדליק את הקוליידר בזמן התקפה
@@ -427,30 +442,75 @@ public class PlayerControler : MonoBehaviour
     //handle knockback
     void OnTriggerEnter(Collider other)
     {
-        if (other.transform.IsChildOf(transform))
-        {
-            Debug.Log("self hit");
-            return;
-        }
-        else if (KB_PlayerMask == (KB_PlayerMask | (1 << other.transform.gameObject.layer)))
-        {
-            //Apply knockback
-            //controller = gameObject.GetComponent<CharacterController>();
-            
-            DamageControl damageControl = other.GetComponent<DamageControl>();
 
-            if (damageControl != null) // אם יש לו את הסקריפט
-            {
-                float force = damageControl.getDamage();
-                Debug.Log("Knockback Value: " + force);
-                takehealth(force);
-            }
-        }
     }
+    //    if (other.transform.IsChildOf(transform))
+    //    {
+    //        Debug.Log("self hit");
+    //        return;
+    //    }
+    //    else if (KB_PlayerMask == (KB_PlayerMask | (1 << other.transform.gameObject.layer)))
+    //    {
+    //        //Apply knockback
+    //        //controller = gameObject.GetComponent<CharacterController>();
+
+        //        DamageControl damageControl = other.GetComponent<DamageControl>();
+
+        //        if (damageControl != null) // אם יש לו את הסקריפט
+        //        {
+        //            float force = damageControl.getDamage();
+        //            Debug.Log("Knockback Value: " + force);
+        //            takehealth(force);
+        //        }
+        //    }
+        //}
 
     private IEnumerator SpawnDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
 
+    }
+
+    //raycast cuz unity is shiiit (new)
+    private void Attack1()
+    {
+        _animator.Play(_PLAYER_ATTACK);
+
+        // בדיקה האם יש שחקן באזור הפגיעה
+        Collider[] hitPlayers = Physics.OverlapBox(transform.position, boxSize_hitbox_1, transform.rotation, KB_PlayerMask);
+
+        if (hitPlayers.Length > 0)
+        {
+
+            //Debug.Log("attack 1 active");
+            hitbox1 = true;
+
+            foreach (Collider player in hitPlayers)
+            {
+                PlayerControler playerScript = player.GetComponent<PlayerControler>();
+                HealthControler playerHealthScript = player.GetComponent<HealthControler>();
+
+                if (playerScript != null && playerScript.getPlayerIndex() != this.getPlayerIndex())
+                {
+                    Debug.Log("Damage control: " + player.name);
+
+                    // קביעת זמן Knockback
+                    playerScript.KBCounter = playerScript.KBTotalTime;
+
+                    // בדיקת כיוון הפגיעה
+                    playerScript.KnockFromRight = (player.transform.position.x <= transform.position.x); //if hit from the left go left and if right go right
+
+                    // שליחת נזק ל-HealthController
+                    playerHealthScript.takeDamage(damage1);
+                }
+            }
+        }
+        else
+        {
+            Debug.Log("NOT HIT");
+            hitbox1 = false;
+        }
+
+        StartCoroutine(SpawnDelay(TimeAttack1));
     }
 }

@@ -374,6 +374,14 @@
 "Assets/scripts/GameRespawn.cs"
 "Assets/scripts/MainMenu.cs"
 "Assets/scripts/PlayerPrefabSelector.cs"
+"Assets/scripts/State Machine/PlayerBaseState.cs"
+"Assets/scripts/State Machine/PlayerGroundState.cs"
+"Assets/scripts/State Machine/PlayerIdleState.cs"
+"Assets/scripts/State Machine/PlayerJumpState.cs"
+"Assets/scripts/State Machine/PlayerRunState.cs"
+"Assets/scripts/State Machine/PlayerStateFactory.cs"
+"Assets/scripts/State Machine/PlayerStateMachine.cs"
+"Assets/scripts/State Machine/PlayerWalkState.cs"
 "Assets/StartGameButton.cs"
 -langversion:9.0
 /deterministic

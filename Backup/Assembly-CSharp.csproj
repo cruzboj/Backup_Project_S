@@ -63,10 +63,13 @@
     <Compile Include="Assets\indexManagerHeader.cs" />
     <Compile Include="Assets\scripts\GameRespawn.cs" />
     <Compile Include="Assets\materials\Mouse\CursorSpawnHandler.cs" />
+    <Compile Include="Assets\scripts\State Machine\PlayerIdleState.cs" />
     <Compile Include="Assets\HitBoxScript.cs" />
+    <Compile Include="Assets\scripts\State Machine\PlayerJumpState.cs" />
     <Compile Include="Assets\materials\Mouse\MouseIndexPlayer.cs" />
     <Compile Include="Assets\scripts\PlayerPrefabSelector.cs" />
     <Compile Include="Assets\materials\Mouse\CharacterSelectManager.cs" />
+    <Compile Include="Assets\scripts\State Machine\PlayerStateFactory.cs" />
     <Compile Include="Assets\IndexPlayer.cs" />
     <Compile Include="Assets\materials\Button\ObjectTransferManager.cs" />
     <Compile Include="Assets\StartGameButton.cs" />
@@ -74,10 +77,15 @@
     <Compile Include="Assets\scripts\CharacterSelectionMenu.cs" />
     <Compile Include="Assets\materials\Button\ButtonScript.cs" />
     <Compile Include="Assets\materials\Mouse\DeviceManager.cs" />
+    <Compile Include="Assets\scripts\State Machine\PlayerWalkState.cs" />
     <Compile Include="Assets\materials\Button\StartButtonScript.cs" />
+    <Compile Include="Assets\scripts\State Machine\PlayerBaseState.cs" />
+    <Compile Include="Assets\scripts\State Machine\PlayerGroundState.cs" />
     <Compile Include="Assets\materials\Button\GameManager.cs" />
     <Compile Include="Assets\materials\Mouse\NewVirtualMouse.cs" />
+    <Compile Include="Assets\scripts\State Machine\PlayerRunState.cs" />
     <Compile Include="Assets\DamageController.cs" />
+    <Compile Include="Assets\scripts\State Machine\PlayerStateMachine.cs" />
     <Compile Include="Assets\HealthControllerScript.cs" />
     <Compile Include="Assets\PlayerControler.cs" />
   </ItemGroup>

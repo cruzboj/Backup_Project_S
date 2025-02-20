@@ -23,13 +23,14 @@ public class HealthControler : MonoBehaviour
 
     //[SerializeField] private PlayerStateMachine player;
     [SerializeField] private PlayerControler player;
-    private int playerIndex;
+    public int playerIndex;
     private bool isTextFound = false;
 
     private void Start()
     {
         currenthealth = 0;
         UpdateHealthText();
+        playerIndex = player.getPlayerIndex();
     }
 
     public void takeDamage(float damage)
@@ -41,7 +42,7 @@ public class HealthControler : MonoBehaviour
     {
         FindAndAssignHealthText();
         player.takehealth(currenthealth);
-
+        
     }
     private void FindAndAssignHealthText()
     {
