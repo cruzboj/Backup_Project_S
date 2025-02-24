@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="Assets\indexManagerHeader.cs" />
     <Compile Include="Assets\scripts\GameRespawn.cs" />
+    <Compile Include="Assets\scripts\State Machine\PlayerDoubleJumpState.cs" />
     <Compile Include="Assets\materials\Mouse\CursorSpawnHandler.cs" />
     <Compile Include="Assets\scripts\State Machine\PlayerIdleState.cs" />
     <Compile Include="Assets\HitBoxScript.cs" />
@@ -72,11 +73,13 @@
     <Compile Include="Assets\scripts\State Machine\PlayerStateFactory.cs" />
     <Compile Include="Assets\IndexPlayer.cs" />
     <Compile Include="Assets\materials\Button\ObjectTransferManager.cs" />
+    <Compile Include="Assets\scripts\ProjectileBehaviour.cs" />
     <Compile Include="Assets\StartGameButton.cs" />
     <Compile Include="Assets\scripts\MainMenu.cs" />
     <Compile Include="Assets\scripts\CharacterSelectionMenu.cs" />
     <Compile Include="Assets\materials\Button\ButtonScript.cs" />
     <Compile Include="Assets\materials\Mouse\DeviceManager.cs" />
+    <Compile Include="Assets\scripts\leadge_script.cs" />
     <Compile Include="Assets\scripts\State Machine\PlayerWalkState.cs" />
     <Compile Include="Assets\materials\Button\StartButtonScript.cs" />
     <Compile Include="Assets\scripts\State Machine\PlayerBaseState.cs" />
@@ -86,13 +89,16 @@
     <Compile Include="Assets\scripts\State Machine\PlayerRunState.cs" />
     <Compile Include="Assets\DamageController.cs" />
     <Compile Include="Assets\scripts\State Machine\PlayerStateMachine.cs" />
+    <Compile Include="Assets\scripts\State Machine\PlayerStateAttack1.cs" />
     <Compile Include="Assets\HealthControllerScript.cs" />
     <Compile Include="Assets\PlayerControler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
+    <None Include="Assets\materials\effects\CFXR Assets\Shaders\CFXR_SETTINGS.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
+    <None Include="Assets\materials\effects\CFXR Assets\Shaders\CFXR.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Mobile.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF SSD.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Surface-Mobile.shader" />
@@ -104,10 +110,13 @@
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Properties.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Surface.cginc" />
+    <None Include="Assets\Frank_RPG_Gunslinger\Documentation\Frank_Gunslinger_MotionList.txt" />
+    <None Include="Assets\materials\effects\CFXR Assets\Shaders\CFXR_PASSES.cginc" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF Overlay.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap-Mobile.shader" />
+    <None Include="Assets\materials\effects\CFXR Assets\Shaders\CFXR_URP.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Sprite.shader" />
   </ItemGroup>
@@ -1006,6 +1015,10 @@
       <Project>{711B8C6C-EDC1-50C7-A0E3-FE9239A4B612}</Project>
       <Name>Unity.VisualStudio.Editor</Name>
     </ProjectReference>
+    <ProjectReference Include="CFXRRuntime.csproj">
+      <Project>{D887110D-43F0-5AC5-3F64-52DA0B81C970}</Project>
+      <Name>CFXRRuntime</Name>
+    </ProjectReference>
     <ProjectReference Include="Unity.TextMeshPro.csproj">
       <Project>{23B626C2-B26A-7E9F-FE7D-A7CBF122BA0C}</Project>
       <Name>Unity.TextMeshPro</Name>
@@ -1033,6 +1046,10 @@
     <ProjectReference Include="Unity.VSCode.Editor.csproj">
       <Project>{92E3FF1C-55DA-F7AE-C1AE-3AC891CC9849}</Project>
       <Name>Unity.VSCode.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="CFXREditor.csproj">
+      <Project>{B338E2F2-0F5A-9280-FB34-7E477096F846}</Project>
+      <Name>CFXREditor</Name>
     </ProjectReference>
     <ProjectReference Include="Unity.VisualScripting.Flow.csproj">
       <Project>{F9F71B70-1435-CB75-F3B2-45185D4597CE}</Project>

@@ -12,6 +12,9 @@ public class PlayerStateMachine : MonoBehaviour
 {
     [Header("Player Parameters")]
     public int PlayerIndex;
+    //attaking collider
+    public Transform PlayerTransform;
+
     public int getPlayerIndex() { return PlayerIndex; }
     [SerializeField] private float playerWeight = 1.4f;
     public float PlayerWeight { get { return playerWeight; } }
@@ -22,7 +25,7 @@ public class PlayerStateMachine : MonoBehaviour
 
     //handel rotation ints
     private float currentYRotation = 0f; // Track the current rotation
-    private float _rotationFactorPerFrame = 25.8f;
+    private float _rotationFactorPerFrame = 26f; //was 25.8
 
 
     [Header("Gravity Parameters")]
@@ -37,7 +40,7 @@ public class PlayerStateMachine : MonoBehaviour
     [SerializeField] public LayerMask layerMask; //set to Ground
     RaycastHit hit;
     private float rayBeam = 0.1f;
-    public Vector3 boxSize = new Vector3(1f, 0.3f, 1f); //1 ,0.3 ,1
+    public Vector3 boxSize = new Vector3(1f, 0.02f, 1f); //1 ,0.02 ,1 thight ground check
     public bool _grounded = true;
     //private float _downForce = 9.8f;
     public bool Grounded { get { return _grounded; } set { _grounded = value; } }
@@ -49,11 +52,11 @@ public class PlayerStateMachine : MonoBehaviour
         Gizmos.color = Color.green;
         Gizmos.DrawCube(transform.position - transform.up * rayBeam, boxSize);
 
-        //attack1_hitbox
-        Gizmos.color = new Color(1f, 0f, 0f, 0.5f);
-        Vector3 positionInFront = transform.position + transform.forward * location_ray_position_1; // "2f" הוא המרחק מהדמות
-        positionInFront.y += location_ray_height_1; // הזז את הגיזמו למעלה ב-0.5 יחידות
-        Gizmos.DrawCube(positionInFront, boxSize_hitbox_1);
+        ////attack1_hitbox
+        //Gizmos.color = new Color(1f, 0f, 0f, 0.5f);
+        //Vector3 positionInFront = transform.position + transform.forward * location_ray_position_1; // "2f" הוא המרחק מהדמות
+        //positionInFront.y += location_ray_height_1; // הזז את הגיזמו למעלה ב-0.5 יחידות
+        //Gizmos.DrawCube(positionInFront, boxSize_hitbox_1);
     }
 
 
@@ -65,8 +68,23 @@ public class PlayerStateMachine : MonoBehaviour
     private float maxJumptime = 0.5f;
     private float intitialjumpVelocity;
     public float _jumpSpeed = 30f;
+    public float InitialJumpVelocity { get { return intitialjumpVelocity; } }
+
+    //https://www.youtube.com/watch?v=RFix_Kg2Di0 for smooth jumping after leaving platform
+    private float _coyoteTime = 1f;
+    private float _coyoteTimeCounter;
+    private float _jumpBufferTime = 1f;
+    private float _jumpBufferCounter;
+
+    public float CoyoteTime { get { return _coyoteTime; } }
+    public float CoyoteTimeCounter { get { return _coyoteTimeCounter; } set { _coyoteTimeCounter = value; } }
+    public float JumpBufferTime { get { return _jumpBufferTime; } }
+    public float JumpBufferCounter { get { return _jumpBufferCounter; } set { _jumpBufferCounter = value; } }
+
     //doublejump effect
-    //public ParticleSystem DoublejumpSmoke;
+    public ParticleSystem DoublejumpSmoke;
+    
+
 
     //state machine setters && getters 
     public bool Jumped { get { return jumped; } set { jumped = value; } }
@@ -88,28 +106,33 @@ public class PlayerStateMachine : MonoBehaviour
     Vector3 _currentMovementInput;
     Vector3 _currentMovement;
     Vector3 _appliedMovment;
-    public float _walkSpeed = 3f;
-    public float _runSpeed = 6f;
+    public float _walkSpeed = 6f;
+    public float _runSpeed = 15f;
     private float _currentSpeed;
     private float _threshold = 0.9f;
 
     public Vector3 CurrentMovement { get { return _currentMovement; } set { _currentMovement = value; } }
-
-    [Header("Normal Attack Parameters")]
-    public bool _isAttackPressed;
-    public float TimeAttack1 = 10f;
-
+    public Vector3 CurrentMovementInput { get { return _currentMovementInput; } }
+    public Vector3 AppliedMovement { get { return _appliedMovment; } set { _appliedMovment = value; } }
+    public float Threshold { get { return _threshold; } }
 
     //animations
     public Animator _animator;
     const string _PLAYER_RUN = "Player_run";
     const string _PLAYER_IDLE = "Player_idle";
+    const string _PLAYER_CROUCH = "Player_crouch";
     const string _PLAYER_WALK = "Player_walk";
     const string _PLAYER_JUMP = "Player_jump";
+    const string _PLAYER_DOUBLE_JUMP = "Player_doublejump";
     const string _PLAYER_ATTACK = "Attack 1";
+    const string _PLAYER_JUMP_RECOIL = "Player_jump_recoil";
     //getters
     public Animator ANIMATOR { get { return _animator; } }
-    public string PLAYER_JUMP { get {return _PLAYER_JUMP;}}
+    public string PLAYER_JUMP { get { return _PLAYER_JUMP; } }
+    public string PLAYER_DOUBLE_JUMP { get { return _PLAYER_DOUBLE_JUMP; } }
+    public string PLAYER_IDLE { get { return _PLAYER_IDLE; } }
+    public string PLAYER_ATTACK { get { return "Attack 1"; } }
+    public string PLAYER_JUMP_RECOIL { get { return "Player_jump_recoil"; } }
 
     [Header("KnockBack")]
     public float KBForce = 1f;
@@ -128,6 +151,20 @@ public class PlayerStateMachine : MonoBehaviour
     [SerializeField] public LayerMask KB_PlayerMask;
     RaycastHit hit_hitbox;
     private float rayBeam_knockback = 0.1f;
+    public LayerMask Global_KB_PlayerMask { get { return KB_PlayerMask; } }
+
+    [Header("Normal Attack Parameters")]
+    public bool _isAttackPressed;
+    public float TimeAttack1 = 10f;
+
+    //projectile
+    public bool _hasProjectil;
+    //new using script ProjectileBehavior
+    public ProjectileBehaviour projectilePrefab;
+    public Transform LauchOffSet; //maybe _ctx.transform
+
+    public bool IsAttackPressed { get { return _isAttackPressed; } }
+    public bool HasProjectil { get { return _hasProjectil; } }
 
     [Header("RAY CAST Attack1")]
     public Vector3 boxSize_hitbox_1 = new Vector3(1f, 0.3f, 1f); //1 ,0.3 ,1
@@ -136,10 +173,15 @@ public class PlayerStateMachine : MonoBehaviour
     public bool hitbox1 = false;
     public float damage1 = 10f;
     public float getDamage1() { return damage1; }
+    public Vector3 BoxSize_hitbox_1 { get { return boxSize_hitbox_1; } }
+    public float Location_Ray_Position_1 { get { return location_ray_position_1; } }
+    public float Location_Ray_height_1 { get {return location_ray_height_1; } }
+    public bool HitBox1 { get { return hitbox1; } set { hitbox1 = value; } }
+   
 
-    //attaking collider
-    [SerializeField] private Collider[] childCollider; // Reference to the capsule collider
 
+    //[SerializeField] private Collider[] childCollider; // Reference to the capsule collider
+    
     //State Variables
     PlayerBaseState _currentState;
     PlayerStateFactory _state;
@@ -197,6 +239,7 @@ public class PlayerStateMachine : MonoBehaviour
     {
         controller = gameObject.GetComponent<CharacterController>();
         _animator = GetComponent<Animator>();
+        PlayerTransform = this.transform;
     }
 
     void Update()
@@ -209,7 +252,9 @@ public class PlayerStateMachine : MonoBehaviour
 
         if (KBCounter < 0)
         {
-            controller.Move(_appliedMovment * Time.deltaTime);
+            //controller.Move(_appliedMovment * Time.deltaTime);
+            //_appliedMovment.x = _currentMovement.x;
+            //_appliedMovment.y = _currentMovement.y;
             handleMovement();
         }
         else
@@ -251,22 +296,26 @@ public class PlayerStateMachine : MonoBehaviour
         //    handleMovement();
         //}
 
+
         //Attack Check
-        if (_isAttackPressed && _grounded)
-        {
-            //handleAttack();
-            Attack1();
-        }
-        else if (_isAttackPressed && !_grounded)
-        {
-            //handleAirAttack();
-        }
-        else
-        {
+        //if (_isAttackPressed && _grounded)
+        //{
+        //    //handleAttack();
+        //    //Attack1();
+        //}
 
-        }
+        //else if (_isAttackPressed && !_grounded)
+        //{
+        //    //handleAirAttack();
+        //}
+        //else
+        //{
 
-        
+        //}
+
+        //idont think we can pull in on state machine
+        JumpBufferCounter -= Time.deltaTime;
+
         GroundCheck();
         handleGravity();
 
@@ -283,7 +332,13 @@ public class PlayerStateMachine : MonoBehaviour
     {
         _currentMovementInput = context.ReadValue<Vector2>();
         _isMovementPressed = _currentMovementInput.magnitude > 0;
-        if (!_isMovementPressed)
+        if (_grounded && _currentMovementInput.y < 0)
+        {
+            _isRunning = false;
+            _isWalking = false;
+            _animator.Play(_PLAYER_CROUCH);
+        }
+        else if (!_isMovementPressed)
         {
             _isRunning = false;
             _isWalking = false;
@@ -301,7 +356,7 @@ public class PlayerStateMachine : MonoBehaviour
             _isRunning = false;
             _animator.Play(_PLAYER_WALK);
         }
-
+        
 
         //old movement
         //movementInput = context.ReadValue<Vector2>();
@@ -349,20 +404,55 @@ public class PlayerStateMachine : MonoBehaviour
 
     void handleMovement()
     {
-        
-        Vector3 move;
+
+        Vector3 move = Vector3.zero; //Initialize move to avoid unassigned variable error
+
         if (_kbCounter < 0)
         {
-            move = new Vector3(_currentMovementInput.x, _currentMovement.y, 0);
+            //crouch
+            if(_grounded && _currentMovementInput.y < 0)
+            {
+                //impement small hurtbox script
+            }
+            //walk
+            else if(_currentMovementInput.magnitude < _threshold)
+            {
+                //fix
+                //_appliedMovment.x = _currentMovement.x * _walkSpeed;
+                //_appliedMovment.y = _currentMovement.y;
+                //
+                _currentMovement = new Vector3(_currentMovementInput.x, _currentMovement.y, 0);
+                _appliedMovment = new Vector3(_currentMovement.x * _walkSpeed, _currentMovement.y, 0);
+                move = _appliedMovment;
+                //Debug.Log($"Walking: Move = {move}");
+                //move = new Vector3(_currentMovementInput.x , _currentMovement.y, 0);
+                //controller.Move(move * Time.deltaTime * _walkSpeed);
+            }
+            //run
+            else if(_currentMovementInput.magnitude >= _threshold)
+            {
+                //fix
+                //_appliedMovment.x = _currentMovement.x * _runSpeed;
+                //_appliedMovment.y = _currentMovement.y;
+                //
+                _currentMovement = new Vector3(_currentMovementInput.x, _currentMovement.y, 0);
+                _appliedMovment = new Vector3(_currentMovement.x * _runSpeed, _currentMovement.y, 0);
+                move = _appliedMovment;
+                //Debug.Log($"Running: Move = {move}");
+                //move = new Vector3(_currentMovementInput.x, _currentMovement.y, 0);
+                //controller.Move(move * Time.deltaTime * _runSpeed);
+            }
 
+            controller.Move(Time.deltaTime * move);
         }
         else
         {
             move = new Vector3((_currentMovement.x * _currentMovement.x) / playerWeight, (_currentMovement.y * _currentMovement.y) / playerWeight, 0); //look at desmos [-(0.5* 20)/x]
             Debug.Log($"Knockback Move: X={move.x}, Y={move.y}, Force={KBForce}");
+            controller.Move(move * Time.deltaTime);
         }
 
-        controller.Move(move * Time.deltaTime * playerSpeed);
+        
 
         if (!_grounded && _currentMovementInput.y < 0)
         {
@@ -417,21 +507,27 @@ public class PlayerStateMachine : MonoBehaviour
     }
     void handleGravity()
     {
-        if (controller.isGrounded)
-        {
-            float groundedGravity = -.05f;
-            _currentMovement.y = groundedGravity;
-        }
-        else
-        {
-            _currentMovement.y += gravityValue * Time.deltaTime;
-        }
+        //Debug.Log($"Move Input: {_currentMovementInput}, Movement _currentMovement: {_currentMovement} ,Movement _appliedMovment :{_appliedMovment} ");
+        //old and workin
 
-        float maxFallSpeed = gravityValue + 2 ; // Adjust as needed
+        //if (controller.isGrounded)
+        //{
+        //    float groundedGravity = -.05f;
+        //    _currentMovement.y = groundedGravity;
+        //}
+        //else
+        //{
+        //    _currentMovement.y += gravityValue * Time.deltaTime;
+        //}
+
+        //new fix maybe
+
+        float maxFallSpeed = gravityValue * playerWeight * 4; // Adjust as needed
         float maxRiseSpeed = -0.02f; // Adjust to prevent "flying"
 
         bool isFalling = _currentMovement.y <= 0.0f || !jumped;
         float fallmultiplier = playerWeight;
+
 
         //if (!_isMovementPressed && isFalling)
         //{
@@ -443,52 +539,55 @@ public class PlayerStateMachine : MonoBehaviour
 
 
         //}
-        //if (isFalling)
-        //{
-        //    //if (_isMovementPressed)
-        //    //{
-        //        //additional gravity appled after reacheing apex of jump
-        //        float previousYVelocity = _currentMovement.y;
-        //        _currentMovement.y = CurrentMovement.y + (gravityValue * Time.deltaTime);
-        //        _appliedMovment.y = Mathf.Max((previousYVelocity + _currentMovement.y) * .5f, -0.02f);
-        //    //}
-        //    //else
-        //    //{
-        //    //    //when not moving act weird so i cap it at max speed
-        //    //    float previousYVelocity = _currentMovement.y;
-        //    //    _currentMovement.y = CurrentMovement.y + (gravityValue * Time.deltaTime);
-        //    //    _appliedMovment.y = Mathf.Max((previousYVelocity + _currentMovement.y) * 1f, -0.0000002f);
-        //    //}
+        if (isFalling)
+        {
+            //if (_isMovementPressed)
+            //{
+            //additional gravity appled after reacheing apex of jump
 
-        //}
-        //else
-        //{
-        //    // applied when character is not grounded
-        //    float previousYVelocity = _currentMovement.y;
-        //    _currentMovement.y = _currentMovement.y + (Time.deltaTime);
-        //    _appliedMovment.y = Mathf.Max((previousYVelocity + _currentMovement.y) * .5f, -0.02f);
+            float previousYVelocity = _currentMovement.y;
+            _currentMovement.y = CurrentMovement.y + (gravityValue / fallmultiplier  * Time.deltaTime);
+            _currentMovement.y = Mathf.Clamp(_currentMovement.y, maxFallSpeed, 80 * playerWeight);
+            _appliedMovment.y = Mathf.Max((previousYVelocity + _currentMovement.y) * .5f, -20.0f);
+            //}
+            //    //else
+            //    //{
+            //    //    //when not moving act weird so i cap it at max speed
+            //    //    float previousYVelocity = _currentMovement.y;
+            //    //    _currentMovement.y = CurrentMovement.y + (gravityValue * Time.deltaTime);
+            //    //    _appliedMovment.y = Mathf.Max((previousYVelocity + _currentMovement.y) * 1f, -0.0000002f);
+            //    //}
 
-        //}
+        }
+            else
+            {
+                // applied when character is not grounded
+                float previousYVelocity = _currentMovement.y;
+                _currentMovement.y = _currentMovement.y + (Time.deltaTime);
+                _appliedMovment.y = Mathf.Max((previousYVelocity + _currentMovement.y) * .5f);
 
-        //if (controller.isGrounded)
-        //{
-        //    float groundedGravity = -.05f;
-        //    _currentMovement.y = groundedGravity;
-        //}
-        //else
-        //{
-        //    //applied when character is not grounded
-        //    float previousYVelocity = _currentMovement.y;
-        //    _currentMovement.y = _currentMovement.y + (Time.deltaTime);
-        //    _appliedMovment.y = Mathf.Max((previousYVelocity + _currentMovement.y) * .5f, -0.02f);
-        //}
-    }
+            }
+
+            //if (controller.isGrounded)
+            //{
+            //    float groundedGravity = -.05f;
+            //    _currentMovement.y = groundedGravity;
+            //}
+            //else
+            //{
+            //    //applied when character is not grounded
+            //    float previousYVelocity = _currentMovement.y;
+            //    _currentMovement.y = _currentMovement.y + (Time.deltaTime);
+            //    _appliedMovment.y = Mathf.Max((previousYVelocity + _currentMovement.y) * .5f, -0.02f);
+            //}
+        }
 
     private bool GroundCheck()
     {
         // Check if the box collides with the ground and set the grounded status
         if (Physics.CheckBox(transform.position, boxSize_hitbox_1, transform.rotation, layerMask))
         {
+            _coyoteTimeCounter = _coyoteTime;
             //Debug.Log("Grounded");
             _jumpCount = 0;
             _grounded = true;
@@ -497,6 +596,7 @@ public class PlayerStateMachine : MonoBehaviour
         }
         else
         {
+            _coyoteTimeCounter -= Time.deltaTime;
             //Debug.Log("NOT grounded");
             _grounded = false;
             groundedPlayer = _grounded;
@@ -504,16 +604,16 @@ public class PlayerStateMachine : MonoBehaviour
         }
     }
 
-    private void handleAttack()
-    {
-        _animator.Play(_PLAYER_ATTACK);
-        for (int i = 0; i < childCollider.Length; i++)
-        {
-            childCollider[i].enabled = true; // להדליק את הקוליידר בזמן התקפה
-        }
+    //private void handleAttack()
+    //{
+    //    _animator.Play(_PLAYER_ATTACK);
+    //    for (int i = 0; i < childCollider.Length; i++)
+    //    {
+    //        childCollider[i].enabled = true; // להדליק את הקוליידר בזמן התקפה
+    //    }
 
-        StartCoroutine(SpawnDelay(TimeAttack1));
-    }
+    //    StartCoroutine(SpawnDelay(TimeAttack1));
+    //}
 
     //void HandleJump()
     //{
@@ -529,30 +629,6 @@ public class PlayerStateMachine : MonoBehaviour
     //}
 
     //handle knockback
-    void OnTriggerEnter(Collider other)
-    {
-
-    }
-    //    if (other.transform.IsChildOf(transform))
-    //    {
-    //        Debug.Log("self hit");
-    //        return;
-    //    }
-    //    else if (KB_PlayerMask == (KB_PlayerMask | (1 << other.transform.gameObject.layer)))
-    //    {
-    //        //Apply knockback
-    //        //controller = gameObject.GetComponent<CharacterController>();
-
-    //        DamageControl damageControl = other.GetComponent<DamageControl>();
-
-    //        if (damageControl != null) // אם יש לו את הסקריפט
-    //        {
-    //            float force = damageControl.getDamage();
-    //            Debug.Log("Knockback Value: " + force);
-    //            takehealth(force);
-    //        }
-    //    }
-    //}
 
     private IEnumerator SpawnDelay(float delay)
     {
@@ -561,45 +637,45 @@ public class PlayerStateMachine : MonoBehaviour
     }
 
     //raycast cuz unity is shiiit (new)
-    private void Attack1()
-    {
-        _animator.Play(_PLAYER_ATTACK);
+    //private void Attack1()
+    //{
+    //    _animator.Play(_PLAYER_ATTACK);
 
-        // בדיקה האם יש שחקן באזור הפגיעה
-        Collider[] hitPlayers = Physics.OverlapBox(transform.position, boxSize_hitbox_1, transform.rotation, KB_PlayerMask);
+    //    // בדיקה האם יש שחקן באזור הפגיעה
+    //    Collider[] hitPlayers = Physics.OverlapBox(transform.position, boxSize_hitbox_1, transform.rotation, KB_PlayerMask);
 
-        if (hitPlayers.Length > 0)
-        {
+    //    if (hitPlayers.Length > 0)
+    //    {
 
-            //Debug.Log("attack 1 active");
-            hitbox1 = true;
+    //        //Debug.Log("attack 1 active");
+    //        hitbox1 = true;
 
-            foreach (Collider player in hitPlayers)
-            {
-                PlayerControler playerScript = player.GetComponent<PlayerControler>();
-                HealthControler playerHealthScript = player.GetComponent<HealthControler>();
+    //        foreach (Collider player in hitPlayers)
+    //        {
+    //            PlayerControler playerScript = player.GetComponent<PlayerControler>();
+    //            HealthControler playerHealthScript = player.GetComponent<HealthControler>();
 
-                if (playerScript != null && playerScript.getPlayerIndex() != this.getPlayerIndex())
-                {
-                    Debug.Log("Damage control: " + player.name);
+    //            if (playerScript != null && playerScript.getPlayerIndex() != this.getPlayerIndex())
+    //            {
+    //                Debug.Log("Damage control: " + player.name);
 
-                    // קביעת זמן Knockback
-                    playerScript.KBCounter = playerScript.KBTotalTime;
+    //                // קביעת זמן Knockback
+    //                playerScript.KBCounter = playerScript.KBTotalTime;
 
-                    // בדיקת כיוון הפגיעה
-                    playerScript.KnockFromRight = (player.transform.position.x <= transform.position.x); //if hit from the left go left and if right go right
+    //                // בדיקת כיוון הפגיעה
+    //                playerScript.KnockFromRight = (player.transform.position.x <= transform.position.x); //if hit from the left go left and if right go right
 
-                    // שליחת נזק ל-HealthController
-                    playerHealthScript.takeDamage(damage1);
-                }
-            }
-        }
-        else
-        {
-            Debug.Log("NOT HIT");
-            hitbox1 = false;
-        }
+    //                // שליחת נזק ל-HealthController
+    //                playerHealthScript.takeDamage(damage1);
+    //            }
+    //        }
+    //    }
+    //    else
+    //    {
+    //        Debug.Log("NOT HIT");
+    //        hitbox1 = false;
+    //    }
 
-        StartCoroutine(SpawnDelay(TimeAttack1));
-    }
+    //    StartCoroutine(SpawnDelay(TimeAttack1));
+    //}
 }

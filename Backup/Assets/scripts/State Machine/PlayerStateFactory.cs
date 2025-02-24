@@ -24,8 +24,16 @@ public class PlayerStateFactory
     {
         return new PlayerJumpState(_context, this);
     }
-    public PlayerGroundState Grounded()
+    public PlayerBaseState DoubleJump()
+    {
+        return new PlayerDoubleJumpState(_context, this);
+    }
+    public PlayerBaseState Grounded()
     {
         return new PlayerGroundState(_context, this);
+    }
+    public PlayerBaseState Attack1()
+    {
+        return new PlayerStateAttack1(_context, this);
     }
 }
