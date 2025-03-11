@@ -35,6 +35,12 @@ public class NewVirtualMouse : MonoBehaviour
 
     [SerializeField] public LayerMask layerMask;
 
+    [Header("selected character")]
+    public bool selected;
+    public bool confirmed;
+    public bool getSelected() { return selected; }
+    public bool getConfirmed() { return confirmed; }
+
     private void Start()
     {
         //set player index
@@ -86,6 +92,20 @@ public class NewVirtualMouse : MonoBehaviour
             Child.GetComponent<Image>().sprite = defaultCursor; // שינוי תמונת ה-Child
     }
 
+    public void OnEscClick(InputAction.CallbackContext context)
+    {
+        selected = false;
+    }
+    
+    //public void confirmClick(InputAction.CallbackContext context)
+    //{
+    //    if (selected)
+    //    {
+    //        confirmed = true;
+    //    }
+
+    //}
+
     //private void OnTriggerEnter(Collider other)
     //{
     //    Debug.Log("Mouse on button");
@@ -110,6 +130,7 @@ public class NewVirtualMouse : MonoBehaviour
                 if (other.TryGetComponent<ButtonScript>(out BoxStatus))
                 {
                     buttonIndex = BoxStatus.getButtonIndex();
+                    selected = true;
                 }
             }
         }

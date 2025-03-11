@@ -7,7 +7,7 @@ using TMPro;
 public class HealthControler : MonoBehaviour
 {
 
-    [SerializeField] private string healthTextPrefix = "healthText P";
+    [SerializeField] private string healthTextPrefix = "healthText";
 
     [Header("health parameters")]
     [SerializeField] private float maxHealth = 999.0f;
@@ -21,8 +21,10 @@ public class HealthControler : MonoBehaviour
     [SerializeField] private Color originalHealthColor;
     [SerializeField] private Color damageHealthColor;
 
+    public LayerMask layerMask;
+
     //[SerializeField] private PlayerStateMachine player;
-    [SerializeField] private PlayerControler player;
+    [SerializeField] private PlayerStateMachine player;
     public int playerIndex;
     private bool isTextFound = false;
 
@@ -30,7 +32,7 @@ public class HealthControler : MonoBehaviour
     {
         currenthealth = 0;
         UpdateHealthText();
-        playerIndex = player.getPlayerIndex();
+        
     }
 
     public void takeDamage(float damage)
@@ -42,7 +44,7 @@ public class HealthControler : MonoBehaviour
     {
         FindAndAssignHealthText();
         player.takehealth(currenthealth);
-        
+        playerIndex = player.getPlayerIndex();
     }
     private void FindAndAssignHealthText()
     {

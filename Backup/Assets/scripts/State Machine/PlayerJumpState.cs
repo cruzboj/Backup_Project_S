@@ -15,7 +15,8 @@ public class PlayerJumpState : PlayerBaseState
         _ctx.JumpBufferCounter = _ctx.JumpBufferTime;
 
         Debug.Log("Jump State");
-        if (_ctx.Jumped && _ctx.Grounded || _ctx.Jumped && (_ctx.JumpCount < _ctx.MaxJumpCount))
+        //if (_ctx.Jumped && _ctx.Grounded || _ctx.Jumped && (_ctx.JumpCount < _ctx.MaxJumpCount))
+        if(_ctx.JumpCount == 0)
         {
             _ctx.ANIMATOR.Play(_ctx.PLAYER_JUMP);
             HandleJump();
@@ -31,7 +32,7 @@ public class PlayerJumpState : PlayerBaseState
     {
         if (_ctx.Jumped && (_ctx.JumpCount <= _ctx.MaxJumpCount))
         {
-            SwitchState(_factory.DoubleJump());
+            HandleJump();
         }
         else if (_ctx.Grounded)
         {
@@ -44,7 +45,7 @@ public class PlayerJumpState : PlayerBaseState
 
     void HandleJump()
     {
-        if (_ctx.JumpBufferCounter >0f /*_ctx.Jumped*/ && _ctx.CoyoteTimeCounter > 0f /*&& _ctx.Grounded*/  /*|| _ctx.Jumped && (_ctx.JumpCount < _ctx.MaxJumpCount)*/)
+        if ((_ctx.JumpCount < _ctx.MaxJumpCount) && _ctx.JumpBufferCounter >0f /*_ctx.Jumped*/ && _ctx.CoyoteTimeCounter > 0f /*&& _ctx.Grounded*/ )
         {
             _ctx.JumpBufferCounter = 0;
             //fix small jumps on walk
@@ -67,6 +68,7 @@ public class PlayerJumpState : PlayerBaseState
                 _ctx.JumpCount++;
                 _ctx.Jumped = false;
                 _ctx.CoyoteTimeCounter = 0f;
+                return;
             }
             //jumps on run
             else
@@ -88,6 +90,7 @@ public class PlayerJumpState : PlayerBaseState
                 _ctx.JumpCount++;
                 _ctx.Jumped = false;
                 _ctx.CoyoteTimeCounter = 0f;
+                return;
             }
         }
     }

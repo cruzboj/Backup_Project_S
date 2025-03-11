@@ -134,8 +134,8 @@
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Manipulators\Sequence\TrackZoom.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Animation\BindingSelector.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Window\TimelineNavigator.cs" />
-    <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Utilities\DisplayNameHelper.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\treeview\Drawers\AnimationTrackDrawer.cs" />
+    <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Utilities\DisplayNameHelper.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Utilities\ObjectReferenceField.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Actions\TrackActions.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Window\TimelineWindow_TrackGui.cs" />
@@ -187,10 +187,10 @@
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\treeview\Drawers\InfiniteTrackDrawer.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Utilities\KeyTraverser.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Manipulators\Trim\TrimItemModeRipple.cs" />
-    <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Window\TimelineWindow_HeaderGui.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\treeview\ManipulationsClips.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Animation\AnimationClipCurveCache.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Window\ViewModel\ScriptableObjectViewPrefs.cs" />
+    <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Window\TimelineWindow_HeaderGui.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Utilities\Scopes\IndentLevelScope.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Undo\UndoExtensions.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Extensions\AnimationTrackExtensions.cs" />
@@ -206,18 +206,18 @@
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Window\Modes\TimelineAssetEditionMode.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Animation\AnimationTrackActions.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Recording\TimelineRecording_PlayableAsset.cs" />
-    <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\treeview\Drawers\Layers\ItemsLayer.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Animation\BindingTreeViewDataSource.cs" />
+    <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\treeview\Drawers\Layers\ItemsLayer.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Signals\TreeView\SignalReceiverItem.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Recording\TimelineRecording_Monobehaviour.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Animation\CurveDataSource.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\CustomEditors\MarkerEditor.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Items\ItemsUtils.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\inspectors\TimelinePreferences.cs" />
-    <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Actions\IAction.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\treeview\ItemGui\TimelineMarkerGUI.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Actions\TimelineAction.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Window\TimelineWindow_TimeArea.cs" />
+    <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Actions\IAction.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\treeview\TrackGui\TimelineTrackGUI.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Animation\CurvesProxy.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\treeview\Drawers\Layers\MarkersLayer.cs" />
@@ -322,8 +322,8 @@
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Signals\SignalAssetInspector.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Window\TimelineWindow_PlayRange.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\inspectors\TimelineProjectSettings.cs" />
-    <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Utilities\Scopes\GUIViewportScope.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Activation\ActivationTrackEditor.cs" />
+    <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Utilities\Scopes\GUIViewportScope.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Signals\SignalEmitterEditor.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Manipulators\Utils\EditModeGUIUtils.cs" />
     <Compile Include="Library\PackageCache\com.unity.timeline@1.7.6\Editor\Window\TimelineWindow_Gui.cs" />
@@ -1240,13 +1240,13 @@
       <Project>{F53C36B8-E3B0-6F9D-98F8-68638DDB54A7}</Project>
       <Name>Unity.Timeline</Name>
     </ProjectReference>
-    <ProjectReference Include="UnityEngine.TestRunner.csproj">
-      <Project>{CE8D00FF-1006-001E-0A63-86FDBF1C886C}</Project>
-      <Name>UnityEngine.TestRunner</Name>
-    </ProjectReference>
     <ProjectReference Include="UnityEditor.TestRunner.csproj">
       <Project>{9DF8BA40-E951-DA6F-8539-D5FB0DFC3747}</Project>
       <Name>UnityEditor.TestRunner</Name>
+    </ProjectReference>
+    <ProjectReference Include="UnityEngine.TestRunner.csproj">
+      <Project>{CE8D00FF-1006-001E-0A63-86FDBF1C886C}</Project>
+      <Name>UnityEngine.TestRunner</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

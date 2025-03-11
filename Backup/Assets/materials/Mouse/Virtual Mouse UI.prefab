@@ -250,6 +250,42 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 6d1ff2ef-6e60-42ca-a38c-0fe0bebb454c
     m_ActionName: player/UI Click[/Mouse/leftButton,/DualShock4GamepadHID/buttonSouth]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1632839126108006890}
+        m_TargetAssemblyTypeName: NewVirtualMouse, Assembly-CSharp
+        m_MethodName: OnEscClick
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: fc3bf441-7c90-4865-a84d-a20d6b1f0e24
+    m_ActionName: player/UI Click Exit[/Keyboard/escape,/DualShock4GamepadHID/buttonNorth]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 95f045ea-2f13-4726-9220-12f68efbe19d
+    m_ActionName: player/Attack[/DualShock4GamepadHID/buttonEast,/Keyboard/l]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1632839126108006890}
+        m_TargetAssemblyTypeName: NewVirtualMouse, Assembly-CSharp
+        m_MethodName: confirmClick
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 3bf1b445-31ee-44be-b5e2-c21b7d397357
+    m_ActionName: player/UI Click Confirm[/Keyboard/semicolon,/DualShock4GamepadHID/select]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: player
@@ -304,6 +340,8 @@ MonoBehaviour:
   layerMask:
     serializedVersion: 2
     m_Bits: 32
+  selected: 0
+  confirmed: 0
 --- !u!135 &5845174785020015126
 SphereCollider:
   m_ObjectHideFlags: 0

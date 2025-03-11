@@ -8,6 +8,20 @@ using UnityEngine.SceneManagement;
 
 public class StartButtonScript : MonoBehaviour
 {
+    //new solution
+    [Header("Start Button Settings")]
+    public Image imageComponent;
+
+    public bool first_time_blueScreen = false;
+    public bool hasConfimed = false;
+    public bool allPlayersSelected = false;
+
+    public GameObject DestroyMouse;
+
+    [Header("BoxCollider")]
+    public GameObject CharactersBoxColliders;
+
+    [Header("Mouse ARRAY")]
     public int[] buttonIndex = new int[10];
     private Image buttonImage;
     public int indexRecived = -1;
@@ -49,8 +63,11 @@ public class StartButtonScript : MonoBehaviour
         spawnPrefab = GetComponent<PlayerPrefabSelector>();
     }
 
+    
     void Update()
     {
+        if(hasConfimed) return;
+
         NewVirtualMouse[] allMice = GameObject.FindObjectsOfType<NewVirtualMouse>();
 
         foreach (NewVirtualMouse mouse in allMice)
@@ -58,6 +75,42 @@ public class StartButtonScript : MonoBehaviour
             if (mouse != null)
             {
                 int playerIndex = mouse.getindex() - 1;
+
+                //Debug.Log("in loop");
+                //check if all players selected character
+                if (!mouse.getSelected())
+                {
+                    //not all players sellected mouse
+                    Debug.Log("allPlayersSelected = False");
+                    //BoxCollider.GetComponent<BoxCollider>().enabled = false;
+                    imageComponent.enabled = false;
+                    allPlayersSelected = false;
+                    CharactersBoxColliders.SetActive(true);
+                    if (first_time_blueScreen)
+                        first_time_blueScreen = false;
+                    return;
+                }
+                else
+                {
+                    //StartCoroutine(Deley(0.5f));
+                    //all players selected mouse
+                    if (!first_time_blueScreen)
+                    {
+                        foreach (var currentMouse in allMice) //turn off all mouses
+                        {
+                            //Debug.Log("hasClicked = False");
+                            currentMouse.Clicked = false;
+                        }
+                    }
+                    first_time_blueScreen = true;
+
+                    //BoxCollider.GetComponent<BoxCollider>().enabled = true;
+                    imageComponent.enabled = true;
+                    allPlayersSelected = true;
+                    CharactersBoxColliders.SetActive(false);
+
+
+                }
 
                 // Store/update this player's data
                 if (playerIndex >= 0 && playerIndex < buttonIndex.Length)
@@ -68,8 +121,24 @@ public class StartButtonScript : MonoBehaviour
                     // Update the buttonIndex array
                     buttonIndex[playerIndex] = mouse.getbuttonIndex();
                 }
+
+                if (mouse.Clicked && allPlayersSelected)
+                {
+                    Debug.Log("hasConfimed = TRUE");
+                    StartCoroutine(SpawnPrefabsWithDelay(1f));
+                    //break;
+                    hasConfimed = true;
+                }
             }
+
+            
         }
+        
+        //if(allPlayersSelected)
+        //    confirm_game();
+
+
+        
 
         //mouseStatus = GameObject.FindObjectOfType<NewVirtualMouse>();
 
@@ -94,110 +163,52 @@ public class StartButtonScript : MonoBehaviour
         //}
     }
 
-
-    private void OnTriggerStay(Collider other)
+    void confirm_game()
     {
-        if ((layerMask.value & (1 << other.gameObject.layer)) != 0)
+        if (allPlayersSelected)
         {
-            mouseStatus = GameObject.FindObjectOfType<NewVirtualMouse>();
-            //NewVirtualMouse currentMouse = other.GetComponent<NewVirtualMouse>();
+            Debug.Log("entered confirm");
+            //hasClicked = false;
+            //allPlayersSelected = false;
 
-            //Debug.Log("Mouse inside me nnya!");
-            indexRecived = mouseStatus.getindex(); //not importent just for testing
-            buttonImage.color = new Color(0f, 0f, 0f);
-            
-            if (mouseStatus.getClicked())
-            //if(currentMouse != null)
-            //if (NewVirtualMouse.getClicked())
-
-            {
-
-                //for (int i = 0; i < 10; i++) //buttonIndex[i] != null
-                //{
-                //    if (buttonIndex[i] != -1)
-                //    {
-                        StartCoroutine(SpawnPrefabsWithDelay(1f));
-                        //Prefab = availablePrefabs[buttonIndex[i]];
-                        //Instantiate(Prefab, Vector3.zero, Quaternion.identity);
-                //    }
-                
-                //}
-            //HashSet<int> spawnedIndices = new HashSet<int>(); // 
-
-            //for (int i = 0; i < buttonIndex.Length; i++)
-            //{
-            //    if (buttonIndex[i] > 0 && !spawnedIndices.Contains(buttonIndex[i]))
-            //    {
-            //        int prefabIndex = buttonIndex[i] - 1;
-
-            //        if (prefabIndex > 0 && prefabIndex < availablePrefabs.Count)
-            //        {
-            //            GameObject Prefab = availablePrefabs[buttonIndex[i]];
-            //            Instantiate(Prefab, Vector3.zero, Quaternion.identity);
-
-            //            spawnedIndices.Add(buttonIndex[i]); // 
-            //        }
-            //    }
-            //}
-            }
+            //StartCoroutine(SpawnPrefabsWithDelay(1f));
+            //return;
         }
-
     }
 
-    private void OnTriggerExit(Collider other)
-    {
-        if ((layerMask.value & (1 << other.gameObject.layer)) != 0)
-        {
-            Debug.Log("Mouse out");
-            buttonImage.color = new Color(0f, 255f, 0f); // #00FF00
-        }
-        //mouseStatus = null;
-    }
 
-    //private IEnumerator SpawnPrefabsWithDelay(float delay)
+    //private void OnTriggerStay(Collider other)
     //{
-    //    yield return new WaitForSeconds(delay);
-    //    //HashSet<int> spawnedIndices = new HashSet<int>(); // למנוע כפילויות
-    //    //for (int i = 0; i < buttonIndex.Length; i++)
-    //    //{
-    //    //    if (buttonIndex[i] > 0 && !spawnedIndices.Contains(buttonIndex[i]))
-    //    //    {
-    //    //        int prefabIndex = buttonIndex[i] - 1;
-
-    //    //        if (prefabIndex > 0 && prefabIndex < availablePrefabs.Count)
-    //    //        {
-    //    //            GameObject Prefab = availablePrefabs[buttonIndex[i]];
-    //    //            Instantiate(Prefab, Vector3.zero, Quaternion.identity);
-
-    //    //            spawnedIndices.Add(buttonIndex[i]); // מונע כפילויות
-    //    //        }
-    //    //    }
-    //    //}
-
-    //    for (int i = 0; i < 10; i++) //buttonIndex[i] != null
+    //    if ((layerMask.value & (1 << other.gameObject.layer)) != 0)
     //    {
-    //        if (buttonIndex[i] != -1)
+    //        mouseStatus = GameObject.FindObjectOfType<NewVirtualMouse>();
+
+    //        //Debug.Log("Mouse inside me nnya!");
+    //        indexRecived = mouseStatus.getindex(); //not importent just for testing
+    //        buttonImage.color = new Color(0f, 0f, 0f);
+
+    //        if (mouseStatus.getClicked() && allPlayersSelected)
     //        {
-    //            Prefab = availablePrefabs[buttonIndex[i]];
-    //            yield return new WaitForSeconds(delay); // מחכה לפני הספאון
-
-    //            //new
-    //            //GameObject spawnedPrefab = Instantiate(Prefab, Vector3.zero, Quaternion.identity);
-    //            //DontDestroyOnLoad(spawnedPrefab);
-
-    //            GameObject spawnedPrefab = Instantiate(availablePrefabs[buttonIndex[i]], Vector3.zero, Quaternion.identity);
-
-    //            // העבר את ה-Prefab ל-DontDestroyOnLoad
-    //            DontDestroyOnLoad(spawnedPrefab);
+    //            StartCoroutine(SpawnPrefabsWithDelay(1f));
     //        }
     //    }
-    //    //new
-    //    yield return new WaitForSeconds(10f);
-    //    SceneManager.LoadScene(scene2Name);
+
     //}
+
+    //private void OnTriggerExit(Collider other)
+    //{
+    //    if ((layerMask.value & (1 << other.gameObject.layer)) != 0)
+    //    {
+    //        Debug.Log("Mouse out");
+    //        buttonImage.color = new Color(0f, 255f, 0f); // #00FF00
+    //    }
+    //    //mouseStatus = null;
+    //}
+
     private IEnumerator SpawnPrefabsWithDelay(float delay)
     {
         spawnedPrefabs.Clear();
+        Destroy(DestroyMouse);
         yield return new WaitForSeconds(delay);
 
         // וודא שיש לנו הורה קבוע
@@ -207,7 +218,7 @@ public class StartButtonScript : MonoBehaviour
             DontDestroyOnLoad(persistentParent);
         }
 
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 6; i++)
         {
             if (buttonIndex[i] != -1)
             {
@@ -241,5 +252,19 @@ public class StartButtonScript : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    
+    private IEnumerator Deley(float delay)
+    {
+        //Debug.Log("DELAY");
+        yield return new WaitForSeconds(delay);
+
+        //if(allPlayersSelected)
+        hasConfimed = true;
+        
+
+        //BoxCollider.GetComponent<BoxCollider>().enabled = true;
+        imageComponent.enabled = true;
+        allPlayersSelected = true;
+        CharactersBoxColliders.SetActive(false);
+        //Debug.Log("after DELAY");
+    }
 }

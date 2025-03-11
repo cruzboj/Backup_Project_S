@@ -32,7 +32,7 @@ public class PlayerStateMachine : MonoBehaviour
     [SerializeField] private float gravityValue = -9.81f;
     //character controller down force
     private Vector3 playerVelocity;
-    public bool groundedPlayer;
+    //public bool groundedPlayer;
     public float GravityValue { get { return gravityValue; } }
 
 
@@ -49,14 +49,27 @@ public class PlayerStateMachine : MonoBehaviour
     private void OnDrawGizmos()
     {
         //hitbox for grounded.
-        Gizmos.color = Color.green;
-        Gizmos.DrawCube(transform.position - transform.up * rayBeam, boxSize);
+        //Gizmos.color = Color.green;
+        //Gizmos.DrawCube(transform.position - transform.up * rayBeam, boxSize);
 
         ////attack1_hitbox
         //Gizmos.color = new Color(1f, 0f, 0f, 0.5f);
         //Vector3 positionInFront = transform.position + transform.forward * location_ray_position_1; // "2f" הוא המרחק מהדמות
         //positionInFront.y += location_ray_height_1; // הזז את הגיזמו למעלה ב-0.5 יחידות
         //Gizmos.DrawCube(positionInFront, boxSize_hitbox_1);
+
+        // Offset slightly below the player
+        Vector3 checkPosition = transform.position + Vector3.down * 0.1f;
+
+        // בדיקה אם הדמות נוגעת בקרקע
+        bool isGrounded = Physics.CheckBox(checkPosition, boxSize, transform.rotation, layerMask);
+
+        // אם נוגע ברצפה -> צבע ורוד, אם לא -> צבע ירוק
+        Gizmos.color = isGrounded ? Color.magenta : Color.green;
+
+        // מצייר את הקובייה כדי לראות את אזור הבדיקה
+        Gizmos.DrawWireCube(checkPosition, boxSize);
+
     }
 
 
@@ -167,7 +180,7 @@ public class PlayerStateMachine : MonoBehaviour
     public bool HasProjectil { get { return _hasProjectil; } }
 
     [Header("RAY CAST Attack1")]
-    public Vector3 boxSize_hitbox_1 = new Vector3(1f, 0.3f, 1f); //1 ,0.3 ,1
+    public Vector3 boxSize_hitbox_1 = new Vector3(1f, 0.02f, 1f); //1 ,0.3 ,1
     public float location_ray_height_1;
     public float location_ray_position_1;
     public bool hitbox1 = false;
@@ -244,6 +257,9 @@ public class PlayerStateMachine : MonoBehaviour
 
     void Update()
     {
+        //update index
+        PlayerIndex = playerInput.user.index;
+
         //Movement check
         if (_isMovementPressed)
         {
@@ -332,17 +348,18 @@ public class PlayerStateMachine : MonoBehaviour
     {
         _currentMovementInput = context.ReadValue<Vector2>();
         _isMovementPressed = _currentMovementInput.magnitude > 0;
-        if (_grounded && _currentMovementInput.y < 0)
-        {
-            _isRunning = false;
-            _isWalking = false;
-            _animator.Play(_PLAYER_CROUCH);
-        }
-        else if (!_isMovementPressed)
+        
+        if (!_isMovementPressed)
         {
             _isRunning = false;
             _isWalking = false;
             _animator.Play(_PLAYER_IDLE);
+        }
+        else if (_grounded && _currentMovementInput.y < 0 && _currentMovementInput.magnitude >= Threshold)
+        {
+            _isRunning = false;
+            _isWalking = false;
+            _animator.Play(_PLAYER_CROUCH);
         }
         else if (_currentMovementInput.magnitude >= _threshold)
         {
@@ -350,6 +367,7 @@ public class PlayerStateMachine : MonoBehaviour
             _isWalking = false;
             _animator.Play(_PLAYER_RUN);
         }
+        
         else if (_currentMovementInput.magnitude < _threshold)
         {
             _isWalking = true;
@@ -358,23 +376,27 @@ public class PlayerStateMachine : MonoBehaviour
         }
         
 
+
         //old movement
         //movementInput = context.ReadValue<Vector2>();
     }
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        if (context.performed) // Trigger only when the button is pressed once
+        if (_jumpCount <= _maxJumpCount)
         {
-            //Debug.LogError("Ouch you clicked me!");
+            if (context.performed) // Trigger only when the button is pressed once
+            {
+                //Debug.LogError("Ouch you clicked me!");
 
-            jumped = true;
-            _grounded = false;
-            //StartCoroutine(SpawnPrefabsWithDelay(0.025f)); //relese the jump button
-        }
-        else if (context.canceled) // Reset on release (optional)
-        {
-            jumped = false;
+                jumped = true;
+                _grounded = false;
+                //StartCoroutine(SpawnPrefabsWithDelay(0.025f)); //relese the jump button
+            }
+            else if (context.canceled) // Reset on release (optional)
+            {
+                jumped = false;
+            }
         }
     }
 
@@ -413,6 +435,8 @@ public class PlayerStateMachine : MonoBehaviour
             if(_grounded && _currentMovementInput.y < 0)
             {
                 //impement small hurtbox script
+                //_currentMovement.y -= DownInput;
+                
             }
             //walk
             else if(_currentMovementInput.magnitude < _threshold)
@@ -452,9 +476,9 @@ public class PlayerStateMachine : MonoBehaviour
             controller.Move(move * Time.deltaTime);
         }
 
-        
 
-        if (!_grounded && _currentMovementInput.y < 0)
+
+        if (!_grounded && _currentMovementInput.y < 0 && _currentMovementInput.magnitude >= Threshold)
         {
             //float adjustedDownInput = Mathf.Clamp(DownInput/playerWeight, 0f, 2* DownInput); //cap down speed to 1f
             //_currentMovement.y -= adjustedDownInput;
@@ -528,36 +552,12 @@ public class PlayerStateMachine : MonoBehaviour
         bool isFalling = _currentMovement.y <= 0.0f || !jumped;
         float fallmultiplier = playerWeight;
 
-
-        //if (!_isMovementPressed && isFalling)
-        //{
-        //    _currentMovement.y += Time.deltaTime;
-        //    _currentMovement.y = Mathf.Clamp(_currentMovement.y, maxFallSpeed, maxRiseSpeed);
-
-        //    //float groundedGravity = -playerWeight * 7.5f;
-        //    //_currentMovement.y = groundedGravity;
-
-
-        //}
         if (isFalling)
         {
-            //if (_isMovementPressed)
-            //{
-            //additional gravity appled after reacheing apex of jump
-
             float previousYVelocity = _currentMovement.y;
             _currentMovement.y = CurrentMovement.y + (gravityValue / fallmultiplier  * Time.deltaTime);
             _currentMovement.y = Mathf.Clamp(_currentMovement.y, maxFallSpeed, 80 * playerWeight);
             _appliedMovment.y = Mathf.Max((previousYVelocity + _currentMovement.y) * .5f, -20.0f);
-            //}
-            //    //else
-            //    //{
-            //    //    //when not moving act weird so i cap it at max speed
-            //    //    float previousYVelocity = _currentMovement.y;
-            //    //    _currentMovement.y = CurrentMovement.y + (gravityValue * Time.deltaTime);
-            //    //    _appliedMovment.y = Mathf.Max((previousYVelocity + _currentMovement.y) * 1f, -0.0000002f);
-            //    //}
-
         }
             else
             {
@@ -582,26 +582,38 @@ public class PlayerStateMachine : MonoBehaviour
             //}
         }
 
-    private bool GroundCheck()
+    private void GroundCheck()
     {
+        Vector3 checkPosition = transform.position + Vector3.down * 0.1f;
         // Check if the box collides with the ground and set the grounded status
-        if (Physics.CheckBox(transform.position, boxSize_hitbox_1, transform.rotation, layerMask))
+        if (Physics.CheckBox(transform.position, boxSize, transform.rotation, layerMask))
+        // Perform the check
+        //if (Physics.CheckBox(checkPosition, boxSize, transform.rotation, layerMask))
         {
+            //Debug.DrawRay(checkPosition, Vector3.down * hit.distance, Color.red);
             _coyoteTimeCounter = _coyoteTime;
             //Debug.Log("Grounded");
             _jumpCount = 0;
             _grounded = true;
-            groundedPlayer = _grounded;
-            return true;
+
+            //groundedPlayer = _grounded;
+            //return true;
+            
         }
         else
         {
             _coyoteTimeCounter -= Time.deltaTime;
             //Debug.Log("NOT grounded");
             _grounded = false;
-            groundedPlayer = _grounded;
-            return false;
+
+            //groundedPlayer = _grounded;
+            //return false;
+            //Debug.DrawRay(checkPosition, Vector3.down * 1f, Color.green);
         }
+
+        // Debugging: Show the actual box in the Scene
+        Debug.DrawRay(checkPosition, Vector3.down * 0.2f, Color.green, 0.1f);
+
     }
 
     //private void handleAttack()

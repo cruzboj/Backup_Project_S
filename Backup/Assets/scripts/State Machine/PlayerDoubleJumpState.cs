@@ -43,7 +43,7 @@ public class PlayerDoubleJumpState : PlayerBaseState
 
 
                 Object.Instantiate(_ctx.DoublejumpSmoke, _ctx.transform.position, Quaternion.Euler(90, 0, 0));
-
+                //_ctx._grounded =false;
                 _ctx.JumpCount++;
                 _ctx.Jumped = false;
             }
@@ -56,7 +56,7 @@ public class PlayerDoubleJumpState : PlayerBaseState
 
 
                 Object.Instantiate(_ctx.DoublejumpSmoke, _ctx.transform.position, Quaternion.Euler(90, 0, 0));
-
+                //_ctx._grounded = false;
                 _ctx.JumpCount++;
                 _ctx.Jumped = false;
             }
